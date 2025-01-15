@@ -49,42 +49,42 @@ namespace TechC
 
         private void Update()
         {
-            //if (player == null)
-            //{
-            //    player = FindPlayerTransform();
-            //    if (player == null) return;
-            //}
+            if (player == null)
+            {
+                player = FindPlayerTransform();
+                if (player == null) return;
+            }
 
-            //// マウスの動きを取得
-            //float mouseX = Input.GetAxis("Mouse X") * GameManager.I.sensitivity;
-            //float mouseY = Input.GetAxis("Mouse Y") * GameManager.I.sensitivity;
+            // マウスの動きを取得
+            float mouseX = Input.GetAxis("Mouse X") * GameManager.I.sensitivity;
+            float mouseY = Input.GetAxis("Mouse Y") * GameManager.I.sensitivity;
 
-            //// 上下回転を更新
-            //rotationX -= mouseY;
-            //rotationX = Mathf.Clamp(rotationX, minYAngle, maxYAngle);
+            // 上下回転を更新
+            rotationX -= mouseY;
+            rotationX = Mathf.Clamp(rotationX, minYAngle, maxYAngle);
 
-            //// 左右回転を更新
-            //rotationY += mouseX;
+            // 左右回転を更新
+            rotationY += mouseX;
 
-            //// プレイヤーの位置を基にカメラの位置を計算
-            //Vector3 offset = new Vector3(0, height, -distance);
-            //Quaternion rotation = Quaternion.Euler(rotationX, rotationY, 0);
+            // プレイヤーの位置を基にカメラの位置を計算
+            Vector3 offset = new Vector3(0, height, -distance);
+            Quaternion rotation = Quaternion.Euler(rotationX, rotationY, 0);
 
-            //targetPosition = player.position;  // プレイヤーの現在位置
-            //desiredPosition = targetPosition + rotation * offset; // 目的地を計算
+            targetPosition = player.position;  // プレイヤーの現在位置
+            desiredPosition = targetPosition + rotation * offset; // 目的地を計算
 
-            //// 壁チェック
-            //if (WallCheck())
-            //{
-            //    // 壁に衝突している場合、カメラ位置を調整
-            //    desiredPosition = wallHitPosition + (desiredPosition - targetPosition).normalized * 0.5f; // 衝突点の手前に少しカメラを配置
-            //}
+            // 壁チェック
+            if (WallCheck())
+            {
+                // 壁に衝突している場合、カメラ位置を調整
+                desiredPosition = wallHitPosition + (desiredPosition - targetPosition).normalized * 0.5f; // 衝突点の手前に少しカメラを配置
+            }
 
-            //// カメラの位置を更新
-            //cam.transform.position = desiredPosition + shakeOffset;
+            // カメラの位置を更新
+            cam.transform.position = desiredPosition + shakeOffset;
 
-            //// カメラの回転を更新
-            //cam.transform.LookAt(player.position + Vector3.up * height);
+            // カメラの回転を更新
+            cam.transform.LookAt(player.position + Vector3.up * height);
         }
 
 

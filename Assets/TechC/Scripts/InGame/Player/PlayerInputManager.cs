@@ -12,15 +12,18 @@ namespace TechC
 
         public Vector3 InputVector => inputVector;
         public bool IsMoving => isMoving;
+        public bool IsDashing => isDashing;
         public bool IsJumping => isJumping;
         public bool IsAttacking => isAttacking;  // 攻撃状態を管理する
+        public bool IsGrappling => isGrappling;  // 攻撃状態を管理する
 
         private Vector3 inputVector;
         private Vector3 moveInput;
         private bool isMoving = false;
+        private bool isDashing = false;
         private bool isJumping = false;
         private bool isAttacking = false;
-
+        private bool isGrappling = false;
 
         private float yMovement = 0f;
         private void Update()
@@ -37,6 +40,29 @@ namespace TechC
 
         // Moveアクションが実行されたときの処理 (XZ軸)
         public void OnMove(InputAction.CallbackContext context) => moveInput = context.ReadValue<Vector2>();
+
+        public void OnDashing(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                isDashing = true;  // ボタンが押された瞬間
+            }
+            else if (context.canceled)
+            {
+                isDashing = false;  // ボタンが離された瞬間
+            }
+        }
+        public   void OnGrapple(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                isGrappling = true;  // ボタンが押された瞬間
+            }
+            else if (context.canceled)
+            {
+                isGrappling = false;  // ボタンが離された瞬間
+            }
+        }
 
         // Jumpアクションが実行されたときの処理 (Y軸を+1にする)
         public void OnJump(InputAction.CallbackContext context)
@@ -62,6 +88,9 @@ namespace TechC
             if (n == 1)
             {
                 ResetAttacking();
+            }else if (n == 2)
+            {
+                ResetGrappling();
             }
         }
         public void OnMenu(InputAction.CallbackContext context)
@@ -74,5 +103,7 @@ namespace TechC
         }
         public void ResetJumping() => isJumping = false;
         public void ResetAttacking() => isAttacking = false;
+        public void ResetGrappling() => isGrappling = false;
+
     }
 }

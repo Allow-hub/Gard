@@ -8,7 +8,8 @@ namespace TechC
     public class GameManager : Singleton<GameManager>
     {
         [SerializeField] private int targetFrameRate = 144;
-
+        public float sensitivity = 2;
+        private bool CanPlay = true;
         public enum GameState
         {
             Title,
@@ -25,6 +26,7 @@ namespace TechC
             QualitySettings.vSyncCount = 0;
             // fps 144 を目標に設定
             Application.targetFrameRate = targetFrameRate;
+            SetState(GameState.Title);
         }
 
 
@@ -36,16 +38,32 @@ namespace TechC
         private void SetState(GameState state)
         {
             currentState = state;
-            //switch (state)
-            //{
-            //}
+            switch (state)
+            {
+                case GameState.Title:
+                    TitleInit();
+                    break;
+                case GameState.Menu:
+                    break;
+                case GameState.Clear:
+                    break;
+                case GameState.GameOver:
+                    break;
+            }
         }
         private void StateHandler()
         {
-            //switch (currentState)
-            //{
-
-            //}
+            switch (currentState)
+            {
+                case GameState.Title:
+                    break;
+                case GameState.Menu:
+                    break;
+                case GameState.Clear:
+                    break;
+                case GameState.GameOver:
+                    break;
+            }
         }
 
         private void ChangeCursorMode(bool visible, CursorLockMode cursorLockMode)
@@ -83,6 +101,11 @@ namespace TechC
                 yield return null;
             }
         }
+
+        public bool GetCanPlay() => CanPlay;
+        public bool ChangeCanPlay() => CanPlay = !CanPlay;
+
+        private void TitleInit() => ChangeCursorMode(false, CursorLockMode.Locked);
     }
 
 }
