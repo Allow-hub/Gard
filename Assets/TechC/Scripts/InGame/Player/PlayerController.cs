@@ -31,7 +31,8 @@ namespace TechC
 
         [SerializeField] private float forwardJumpForce = 15f; // 進行方向ジャンプ力（前方方向）
         [SerializeField] private float forwardJumpMultiplier = 1.5f; // 進行方向ジャンプ時の強さ調整
-
+        [SerializeField] private Transform orientaion;
+        [SerializeField] private GameObject smokeEffect;
         [SerializeField] private float height = 2;
         [SerializeField] private LayerMask groundLayer;  // Ground用のレイヤーマスク
         [SerializeField] private float groundCheckDistance = 0.1f;  // レイキャストの距離
@@ -43,6 +44,7 @@ namespace TechC
         {
             playerCamera = Camera.main;
             rb = GetComponent<Rigidbody>();
+            smokeEffect.SetActive(false);       
         }
 
         private void Update()
@@ -53,7 +55,11 @@ namespace TechC
                 rb.velocity = Vector3.zero;
                 return;
             }
-
+            Vector3 forward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z).normalized;
+            if (forward != Vector3.zero)
+            {
+                orientaion.rotation = Quaternion.LookRotation(forward);
+            }
             if (canJump && playerInputManager.IsJumping)
                 Jump();
         }
@@ -103,12 +109,7 @@ namespace TechC
         private void Jump()
         {
 
-            // カメラの向きをベースにしたジャンプ
-            Vector3 cameraForward = playerCamera.transform.forward; // カメラの前方向ベクトル
-            cameraForward.Normalize(); // 正規化してベクトルの長さを1にする
-
-            // カメラの方向と上方向の力を組み合わせてジャンプ
-            Vector3 jumpDirection = (cameraForward + Vector3.up).normalized;
+            Vector3 jumpDirection = (orientaion.forward + Vector3.up).normalized;  // orientationの前方向と上方向の組み合わせ
             rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
             StartCoroutine(JumpCooldown());
             ////動いていないときのジャンプ
@@ -154,9 +155,11 @@ namespace TechC
         // ジャンプクールダウンのコルーチン
         private IEnumerator JumpCooldown()
         {
+            smokeEffect.SetActive(true);
             anim.SetBool(jumpAnimName, true);
             yield return new WaitForSeconds(jumpCoolTime);
             anim.SetBool(jumpAnimName, false);
+            smokeEffect.SetActive(false);
 
             canJump = true;
 

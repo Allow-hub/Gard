@@ -12,6 +12,7 @@ namespace TechC
         [SerializeField] private float shakeDuration = 0.5f; // シェイクの時間
         [SerializeField] private float shakeMagnitude = 0.3f; // シェイクの強度
         [SerializeField] private float dampingSpeed = 1.0f; // 減衰スピード
+        [SerializeField] private Vector3 additionalOffset = new Vector3(0.5f, 0.2f, 0);
 
         private Camera cam;
         private float rotationX = 0.0f;
@@ -67,17 +68,20 @@ namespace TechC
             rotationY += mouseX;
 
             // プレイヤーの位置を基にカメラの位置を計算
-            Vector3 offset = new Vector3(0, height, -distance);
+            Vector3 baseOffset = new Vector3(0, height, -distance);  // 元のカメラ位置のオフセット
             Quaternion rotation = Quaternion.Euler(rotationX, rotationY, 0);
 
+            // 追加のオフセット調整（例: X方向に少し右、Y方向に少し上）
+            Vector3 offset = baseOffset + additionalOffset;  // オフセットに調整を加える
+
             targetPosition = player.position;  // プレイヤーの現在位置
-            desiredPosition = targetPosition + rotation * offset; // 目的地を計算
+            desiredPosition = targetPosition + rotation * offset; // 調整後の目的地を計算
 
             // 壁チェック
             if (WallCheck())
             {
                 // 壁に衝突している場合、カメラ位置を調整
-                desiredPosition = wallHitPosition + (desiredPosition - targetPosition).normalized * 0.5f; // 衝突点の手前に少しカメラを配置
+                desiredPosition = wallHitPosition + (desiredPosition - targetPosition).normalized * 0.5f;
             }
 
             // カメラの位置を更新
