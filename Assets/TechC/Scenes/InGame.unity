@@ -188,6 +188,7 @@ Transform:
   - {fileID: 1709165830}
   - {fileID: 1035829435}
   - {fileID: 261622094}
+  - {fileID: 811213986}
   m_Father: {fileID: 1782047767}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &71379011
@@ -240,16 +241,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInputManager: {fileID: 71379012}
+  swinging: {fileID: 71379015}
+  chaseCamera: {fileID: 961739754}
   anim: {fileID: 1427170192}
   moveSpeed: 1
   rotationSpeed: 10
   decelerationFactor: 2
+  walkCameraDuration: 0.8
   dashSpeedMultiplier: 2
-  jumpForce: 0.3
+  dashCameraDistance: 1
+  dashCameraDuration: 0.5
+  jumpForce: 1
   jumpCoolTime: 1
-  forwardJumpForce: 3
-  forwardJumpMultiplier: 1.2
-  orientaion: {fileID: 261622094}
+  orientation: {fileID: 261622094}
   smokeEffect: {fileID: 1789470172}
   height: 1
   groundLayer:
@@ -919,6 +923,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 513279415}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &811213985
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 811213986}
+  m_Layer: 7
+  m_Name: CamPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &811213986
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 811213985}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.135, y: 0.569, z: -0.224}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 71379010}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &842133875 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 748e55cf129101347b022e97dfae639e,
@@ -1075,12 +1110,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a16994a8184f8ba4dbae5f02bf2bba76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distance: 1
+  player: {fileID: 811213986}
+  distance: 2
   height: 0.4
   shakeDuration: 0.5
   shakeMagnitude: 0.3
   dampingSpeed: 1
-  additionalOffset: {x: 2, y: 2, z: 0}
+  additionalOffset: {x: 0, y: 0, z: 0}
   wallLayers:
     serializedVersion: 2
     m_Bits: 1

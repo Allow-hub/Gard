@@ -60,7 +60,7 @@ namespace TechC
         {
             CheckForSwingPoint();
 
-            if (playerInputManager.IsGrappling)
+            if (playerInputManager.IsSwinging)
             {
                 if (isSwinging) return;
                 StartSwing();
@@ -87,7 +87,7 @@ namespace TechC
             lr.SetPosition(0, gunTip.position);
             lr.SetPosition(1, swingPoint);
         }
-        private void StartSwing()
+        public void StartSwing()
         {
             if (predictionHit.point == Vector3.zero) return;
             StartCoroutine(Stopping());
@@ -116,9 +116,9 @@ namespace TechC
 
         private IEnumerator Stopping()
         {
-            playerController.ChangeFreezing();
+            playerController.ChangeFreezingState();
             yield return new WaitForSeconds(0.3f);
-            playerController.ChangeFreezing();
+            playerController.ChangeFreezingState();
             // スウィングポイントに向かって力を加える
             Vector3 directionToSwingPoint = (swingPoint - player.position).normalized;
             playerController.PlayerAddForce(directionToSwingPoint, forwardThurstForce, ForceMode.Impulse);

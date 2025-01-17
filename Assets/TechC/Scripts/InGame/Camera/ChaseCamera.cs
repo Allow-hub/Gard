@@ -6,7 +6,7 @@ namespace TechC
 {
     public class ChaseCamera : MonoBehaviour
     {
-        private Transform player;
+        [SerializeField] private Transform player;
         [SerializeField] private float distance = 5.0f;
         [SerializeField] private float height = 2.0f;
         [SerializeField] private float shakeDuration = 0.5f; // シェイクの時間
@@ -14,6 +14,7 @@ namespace TechC
         [SerializeField] private float dampingSpeed = 1.0f; // 減衰スピード
         [SerializeField] private Vector3 additionalOffset = new Vector3(0.5f, 0.2f, 0);
 
+        private float initDistance;
         private Camera cam;
         private float rotationX = 0.0f;
         private float rotationY = 0.0f;
@@ -39,13 +40,15 @@ namespace TechC
         // 衝突する壁のレイヤー
         [SerializeField] private LayerMask wallLayers;
 
-
+        private Coroutine distanceChangeCoroutine;
+        private Coroutine shakeCoroutine;
 
         private void Start()
         {
             cam = Camera.main;
-            player = FindPlayerTransform();
+            //player = FindPlayerTransform();
             initialShakeMagnitude = shakeMagnitude; // 初期のシェイク強度を保存
+            initDistance = distance;    
         }
 
 
@@ -94,12 +97,40 @@ namespace TechC
         }
 
 
+        public void UpCamera(float duration, float newDistance)
+        {
+            if (distanceChangeCoroutine != null)
+            {
+                StopCoroutine(distanceChangeCoroutine);
+            }
+            distanceChangeCoroutine = StartCoroutine(ChangeDistanceOverTime(duration, newDistance));
+        }
 
+        private IEnumerator ChangeDistanceOverTime(float duration, float newDistance)
+        {
+
+            float elapsedTime = 0f;
+            float initialDistance = distance;
+
+            while (elapsedTime < duration)
+            {
+                distance = Mathf.Lerp(initialDistance, newDistance, elapsedTime / duration);
+                elapsedTime += Time.deltaTime;
+                Debug.Log($"Distance updating: {distance}");
+
+                yield return null;
+            }
+
+            distance = newDistance; // 最終的に直接設定
+        }
 
         public void TriggerShake()
         {
-            StopAllCoroutines(); // 既存のシェイクがあれば停止
-            StartCoroutine(Shake());
+            if (shakeCoroutine != null)
+            {
+                StopCoroutine(shakeCoroutine);
+            }
+            shakeCoroutine = StartCoroutine(Shake());
         }
 
         private IEnumerator Shake()
@@ -140,5 +171,7 @@ namespace TechC
         {
             return GameObject.FindWithTag("Player")?.transform;
         }
+
+        public float GetInitDistance()=>initDistance;   
     }
 }

@@ -5,199 +5,221 @@ using UnityEngine.InputSystem;
 
 namespace TechC
 {
+    public enum PlayerState
+    {
+        Idle,
+        Walking,
+        Dashing,
+        Jumping,
+        Swinging,
+        Freezing
+    }
+
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private PlayerInputManager playerInputManager;
+        [SerializeField] private Swinging swinging;
+        [SerializeField] private ChaseCamera chaseCamera;
         [SerializeField] private Animator anim;
-         private Rigidbody rb;
+        private Rigidbody rb;
 
         [Header("Movement")]
-        [SerializeField] private float moveSpeed = 5f;            // 基本移動速度
-        [SerializeField] private float rotationSpeed = 2f;        // 回転速度
-        [SerializeField] private float decelerationFactor = 2f;   // 減速の強さ
-        private const string walkAnimName = "IsWalking";
-        private bool isFreezing = false;
+        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float rotationSpeed = 2f;
+        [SerializeField] private float decelerationFactor = 2f;
+
+        [SerializeField] private float walkCameraDuration = 0.5f;
         private Camera playerCamera;
+
         [Header("Dash")]
-        [SerializeField] private float dashSpeedMultiplier = 2f;  // 通常速度の倍率
-
-        private const string dashAnimName = "IsDashing";
-
-
+        [SerializeField] private float dashSpeedMultiplier = 2f;
+        [SerializeField] private float dashCameraDistance = 0.5f;
+        [SerializeField] private float dashCameraDuration = 0.5f;
 
         [Header("Jump")]
-        [SerializeField] private float jumpForce = 3f;            // ジャンプ力
-        [SerializeField] private float jumpCoolTime = 1f;         // ジャンプのクールタイム
-
-        [SerializeField] private float forwardJumpForce = 15f; // 進行方向ジャンプ力（前方方向）
-        [SerializeField] private float forwardJumpMultiplier = 1.5f; // 進行方向ジャンプ時の強さ調整
-        [SerializeField] private Transform orientaion;
+        [SerializeField] private float jumpForce = 3f;
+        [SerializeField] private float jumpCoolTime = 1f;
+        [SerializeField] private Transform orientation;
         [SerializeField] private GameObject smokeEffect;
-        [SerializeField] private float height = 2;
-        [SerializeField] private LayerMask groundLayer;  // Ground用のレイヤーマスク
-        [SerializeField] private float groundCheckDistance = 0.1f;  // レイキャストの距離
+        [SerializeField] private float height = 2f;
+        [SerializeField] private LayerMask groundLayer;
+        [SerializeField] private float groundCheckDistance = 0.1f;
 
-        private const string jumpAnimName = "IsJumping";
+        private PlayerState currentState = PlayerState.Idle;
         private bool canJump = true;
 
         private void Awake()
         {
             playerCamera = Camera.main;
             rb = GetComponent<Rigidbody>();
-            smokeEffect.SetActive(false);       
+            smokeEffect.SetActive(false);
         }
 
         private void Update()
         {
-            Debug.Log(IsGrounded());
-            if (!GameManager.I.GetCanPlay()||isFreezing)
+            if (!GameManager.I.GetCanPlay())
             {
                 rb.velocity = Vector3.zero;
                 return;
             }
+
             Vector3 forward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z).normalized;
             if (forward != Vector3.zero)
             {
-                orientaion.rotation = Quaternion.LookRotation(forward);
+                orientation.rotation = Quaternion.LookRotation(forward);
             }
-            if (canJump && playerInputManager.IsJumping)
-                Jump();
+            if (playerInputManager.IsSwinging)
+                ChangeSwingingState();
+
+            if (playerInputManager.IsJumping)
+                ChangeJumpingState();
+            StateHandler();
         }
 
         private void FixedUpdate()
         {
-            if (!GameManager.I.GetCanPlay() || isFreezing) return;
+            if (!GameManager.I.GetCanPlay() || currentState == PlayerState.Freezing) return;
             HandleMovement();
         }
 
         private void HandleMovement()
         {
+            if (currentState == PlayerState.Swinging) return;   
             Vector3 inputVector = playerInputManager.InputVector;
-            if (inputVector == Vector3.zero)
-            {
-                anim.SetBool(walkAnimName, false);
-                anim.SetBool(dashAnimName, false);
-                return;
-            }
+            bool isMoving = inputVector != Vector3.zero;
+            bool isDashing = playerInputManager.IsDashing;
 
-            // カメラの向きに基づいて移動ベクトルを計算
+            if (isMoving)
+            {
+                ChangeState(isDashing ? PlayerState.Dashing : PlayerState.Walking);
+                MovePlayer(inputVector, isDashing);
+            }
+            else
+            {
+                ChangeIdleState();
+            }
+        }
+
+        private void MovePlayer(Vector3 inputVector, bool isDashing)
+        {
             Vector3 cameraForward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z).normalized;
             Vector3 cameraRight = new Vector3(playerCamera.transform.right.x, 0, playerCamera.transform.right.z).normalized;
             Vector3 movementDirection = (cameraForward * inputVector.z + cameraRight * inputVector.x).normalized;
 
-            // ダッシュ速度を適用
-            float currentSpeed = playerInputManager.IsDashing ? moveSpeed * dashSpeedMultiplier : moveSpeed;
+            float currentSpeed = isDashing ? moveSpeed * dashSpeedMultiplier : moveSpeed;
             Vector3 adjustedMovement = movementDirection * currentSpeed;
 
-            // プレイヤーの移動
             rb.MovePosition(rb.position + adjustedMovement * Time.deltaTime);
 
-            // プレイヤーの向きを移動方向に合わせる
             if (movementDirection != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(movementDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
-
-            // アニメーション設定
-            anim.SetBool(walkAnimName, !playerInputManager.IsDashing);
-            anim.SetBool(dashAnimName, playerInputManager.IsDashing);
         }
 
 
+
+        private void StateHandler()
+        {
+            switch (currentState)
+            {
+                case PlayerState.Idle:
+                    // Idle状態では移動しない。
+                    break;
+
+                case PlayerState.Walking:
+                    // Walking状態では移動処理を行う
+                    HandleMovement();
+                    break;
+
+                case PlayerState.Dashing:
+                    // Dashing状態ではダッシュ中の移動処理を行う
+                    HandleMovement();
+                    break;
+
+                case PlayerState.Jumping:
+                        Jump();
+                    break;
+
+                case PlayerState.Swinging:
+                    // Swinging状態のとき、移動制限やカメラの調整などを行う
+                    break;
+
+                case PlayerState.Freezing:
+                    // Freezing状態では移動を止めるなど、制限を加える
+                    rb.velocity = Vector3.zero; // プレイヤーを止める
+                    break;
+            }
+        }
+
+
+        private void ChangeState(PlayerState newState)
+        {
+            if (currentState == newState) return;
+            currentState = newState;
+
+            anim.SetBool("IsWalking", newState == PlayerState.Walking);
+            anim.SetBool("IsDashing", newState == PlayerState.Dashing);
+            anim.SetBool("IsJumping", newState == PlayerState.Jumping);
+
+            switch (newState)
+            {
+                case PlayerState.Idle:
+                    break;
+                case PlayerState.Walking:
+                    chaseCamera.UpCamera(walkCameraDuration, chaseCamera.GetInitDistance());
+                    break;
+                case PlayerState.Dashing:
+                    chaseCamera.UpCamera(dashCameraDuration, dashCameraDistance);
+                    break;
+                case PlayerState.Jumping:
+                    break;
+                case PlayerState.Swinging:
+                    swinging.StartSwing();
+                    break;
+                case PlayerState.Freezing:
+                    break;
+            }
+        }
 
         private void Jump()
         {
+            if (!canJump || !IsGrounded()) return;
 
-            Vector3 jumpDirection = (orientaion.forward + Vector3.up).normalized;  // orientationの前方向と上方向の組み合わせ
+            ChangeState(PlayerState.Jumping);
+            Vector3 jumpDirection = (orientation.forward + Vector3.up).normalized;
             rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
             StartCoroutine(JumpCooldown());
-            ////動いていないときのジャンプ
-            //if (canJump && IsGrounded()&&playerInputManager.InputVector==Vector3.zero)
-            //{
-            //    // 垂直ジャンプ
-            //    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            //    canJump = false;
-            //    StartCoroutine(JumpCooldown());
-            //}
-            ////動いているとき動いている方向に強めのジャンプ
-            //else if (canJump &&IsGrounded() && playerInputManager.InputVector != Vector3.zero)
-            //{
-            //    // 上方向の力
-            //    Vector3 upwardJumpDirection = Vector3.up;
-            //    rb.AddForce(upwardJumpDirection * jumpForce, ForceMode.Impulse);
-
-            //    // 進行方向の力
-            //    Vector3 forwardJumpDirection = rb.velocity.normalized + Vector3.up * 2f;  // 上向きの力を少し加える
-            //    rb.AddForce(forwardJumpDirection * forwardJumpForce * forwardJumpMultiplier, ForceMode.Impulse);
-
-            //    canJump = false;
-            //    StartCoroutine(JumpCooldown());
-            //}
-            ////空中でのジャンプキー
-            //else if(canJump && !IsGrounded())
-            //{
-            //    // 上方向の力
-            //    Vector3 upwardJumpDirection = Vector3.up;
-            //    rb.AddForce(upwardJumpDirection * jumpForce, ForceMode.Impulse);
-
-            //    // 進行方向の力
-            //    Vector3 forwardJumpDirection = (rb.velocity.normalized + Vector3.up).normalized;
-            //    rb.AddForce(forwardJumpDirection * forwardJumpForce * forwardJumpMultiplier, ForceMode.Impulse);
-
-            //    canJump = false;
-            //    StartCoroutine(JumpCooldown());
-            //}
-
-
         }
 
-        // ジャンプクールダウンのコルーチン
         private IEnumerator JumpCooldown()
         {
             smokeEffect.SetActive(true);
-            anim.SetBool(jumpAnimName, true);
             yield return new WaitForSeconds(jumpCoolTime);
-            anim.SetBool(jumpAnimName, false);
+            ChangeState(PlayerState.Idle);
             smokeEffect.SetActive(false);
-
             canJump = true;
-
         }
 
         private bool IsGrounded()
         {
-            // オブジェクトの下方向へレイキャスト
-            Vector3 origin =new Vector3(transform.position.x,transform.position.y+height,transform.position.z);
-            Vector3 direction = Vector3.down;
-            float distance = groundCheckDistance;
-
-
-            // レイキャストで接地判定
-            if (Physics.Raycast(origin, direction, distance, groundLayer))
-            {
-                return true;  // GroundLayerに接触している
-            }
-
-            return false;  // 接触していない
-        }
-        private void OnDrawGizmos()
-        {
-            // レイキャストの開始位置と方向を設定
             Vector3 origin = new Vector3(transform.position.x, transform.position.y + height, transform.position.z);
-            Vector3 direction = Vector3.down * groundCheckDistance;
-
-            // Gizmoの色を設定
-            Gizmos.color = Color.red;
-
-            // 下方向へのレイキャストを描画
-            Gizmos.DrawRay(origin, direction);
-
-            // 球を使ったレイの終点の可視化
-            //Gizmos.DrawWireSphere(origin + direction, 0.05f);
+            return Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);
         }
 
-        public void PlayerAddForce(Vector3 dir ,float force , ForceMode forceMode) =>rb.AddForce(dir*force,forceMode);
-        public void ChangeFreezing()=>isFreezing =!isFreezing;
+        public void PlayerAddForce(Vector3 dir, float force, ForceMode forceMode) => rb.AddForce(dir * force, forceMode);
+        public void ChangeIdleState() => ChangeState(PlayerState.Idle);
+
+        public void ChangeWalkingState() => ChangeState(PlayerState.Walking);
+
+        public void ChangeDashingState() => ChangeState(PlayerState.Dashing);
+
+        public void ChangeJumpingState() => ChangeState(PlayerState.Jumping);
+
+        public void ChangeSwingingState() => ChangeState(PlayerState.Swinging);
+
+        public void ChangeFreezingState() => ChangeState(PlayerState.Freezing);
+
     }
 }

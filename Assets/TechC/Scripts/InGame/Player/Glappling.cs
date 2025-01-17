@@ -34,7 +34,7 @@ namespace TechC
 
         private void Update()
         {
-            if (playerInputManager.IsGrappling)
+            if (playerInputManager.IsSwinging)
                 StartGrapple();
 
             if (coolDownTimer > 0)

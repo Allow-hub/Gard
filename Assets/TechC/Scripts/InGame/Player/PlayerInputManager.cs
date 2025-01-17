@@ -15,7 +15,7 @@ namespace TechC
         public bool IsDashing => isDashing;
         public bool IsJumping => isJumping;
         public bool IsAttacking => isAttacking;  // 攻撃状態を管理する
-        public bool IsGrappling => isGrappling;  // 攻撃状態を管理する
+        public bool IsSwinging => isSwinging;  // Swinging状態を管理する
 
         private Vector3 inputVector;
         private Vector3 moveInput;
@@ -23,7 +23,7 @@ namespace TechC
         private bool isDashing = false;
         private bool isJumping = false;
         private bool isAttacking = false;
-        private bool isGrappling = false;
+        private bool isSwinging = false;
 
         private float yMovement = 0f;
         private void Update()
@@ -43,6 +43,8 @@ namespace TechC
 
         public void OnDashing(InputAction.CallbackContext context)
         {
+            if (context.performed) return;
+
             if (context.started)
             {
                 isDashing = true;  // ボタンが押された瞬間
@@ -52,21 +54,23 @@ namespace TechC
                 isDashing = false;  // ボタンが離された瞬間
             }
         }
-        public   void OnGrapple(InputAction.CallbackContext context)
+
+        public void OnSwinging(InputAction.CallbackContext context)
         {
             if (context.started)
             {
-                isGrappling = true;  // ボタンが押された瞬間
+                isSwinging = true;  // ボタンが押された瞬間
             }
             else if (context.canceled)
             {
-                isGrappling = false;  // ボタンが離された瞬間
+                isSwinging = false;  // ボタンが離された瞬間
             }
         }
 
         // Jumpアクションが実行されたときの処理 (Y軸を+1にする)
         public void OnJump(InputAction.CallbackContext context)
         {
+            if (!context.performed) return;
             isJumping = true;  // ジャンプ状態をtrueに
             StartCoroutine(Delay(0));
         }
@@ -74,6 +78,8 @@ namespace TechC
         // Attackアクションが実行されたときの処理
         public void OnAttack(InputAction.CallbackContext context)
         {
+            if (!context.performed) return;
+
             isAttacking = true;  // 攻撃状態をtrueに
             StartCoroutine(Delay(1));
         }
@@ -88,11 +94,13 @@ namespace TechC
             if (n == 1)
             {
                 ResetAttacking();
-            }else if (n == 2)
+            }
+            else if (n == 2)
             {
-                ResetGrappling();
+                ResetSwinging();
             }
         }
+
         public void OnMenu(InputAction.CallbackContext context)
         {
             //if (GameManager.I == null) return;
@@ -101,9 +109,10 @@ namespace TechC
             //else
             //    GameManager.I.ChangeMenuState();
         }
+
         public void ResetJumping() => isJumping = false;
         public void ResetAttacking() => isAttacking = false;
-        public void ResetGrappling() => isGrappling = false;
+        public void ResetSwinging() => isSwinging = false;
 
     }
 }
