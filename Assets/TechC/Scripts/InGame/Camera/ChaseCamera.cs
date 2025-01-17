@@ -48,6 +48,8 @@ namespace TechC
             initialShakeMagnitude = shakeMagnitude; // 初期のシェイク強度を保存
         }
 
+
+
         private void Update()
         {
             if (player == null)
@@ -71,7 +73,7 @@ namespace TechC
             Vector3 baseOffset = new Vector3(0, height, -distance);  // 元のカメラ位置のオフセット
             Quaternion rotation = Quaternion.Euler(rotationX, rotationY, 0);
 
-            // 追加のオフセット調整（例: X方向に少し右、Y方向に少し上）
+            // 右上にカメラを配置するためのオフセット
             Vector3 offset = baseOffset + additionalOffset;  // オフセットに調整を加える
 
             targetPosition = player.position;  // プレイヤーの現在位置
@@ -90,6 +92,7 @@ namespace TechC
             // カメラの回転を更新
             cam.transform.LookAt(player.position + Vector3.up * height);
         }
+
 
 
 
