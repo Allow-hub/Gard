@@ -62,7 +62,6 @@ namespace TechC
 
             if (playerInputManager.IsSwinging)
             {
-                if (isSwinging) return;
                 StartSwing();
                 isSwinging = true;
 
@@ -89,27 +88,33 @@ namespace TechC
         }
         public void StartSwing()
         {
+
             if (predictionHit.point == Vector3.zero) return;
             StartCoroutine(Stopping());
             anim.SetBool(animName, true);
             swingPoint = predictionHit.point;
 
             // SpringJointの作成
-            joint = player.gameObject.AddComponent<SpringJoint>();
-            joint.autoConfigureConnectedAnchor = false;
-            joint.connectedAnchor = swingPoint;
+            if (joint == null)
+            {
+
+                joint = player.gameObject.AddComponent<SpringJoint>();
+                joint.autoConfigureConnectedAnchor = false;
+                joint.connectedAnchor = swingPoint;
+
+                joint.spring = spring;
+                joint.damper = damper;
+                joint.massScale = mathScale;
+
+                // ロープを描画
+                lr.positionCount = 2;
+            }
 
             float distanceFromPoint = Vector3.Distance(player.position, swingPoint);
 
             // SpringJointの距離設定
             joint.maxDistance = distanceFromPoint * distanceFromPointMax;
             joint.minDistance = distanceFromPoint * distanceFromPointMin;
-            joint.spring = spring;
-            joint.damper = damper;
-            joint.massScale = mathScale;
-
-            // ロープを描画
-            lr.positionCount = 2;
             currentGrapplePosition = gunTip.position;
 
          }
@@ -125,7 +130,7 @@ namespace TechC
 
         }
 
-        private void StopSwing()
+        public void StopSwing()
         {
             anim.SetBool(animName, false);
 

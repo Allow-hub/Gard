@@ -354,7 +354,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 71379012}
         m_TargetAssemblyTypeName: TechC.PlayerInputManager, Assembly-CSharp
-        m_MethodName: OnGrapple
+        m_MethodName: OnSwinging
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

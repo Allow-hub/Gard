@@ -47,7 +47,7 @@ namespace TechC
         {
             cam = Camera.main;
             //player = FindPlayerTransform();
-            initialShakeMagnitude = shakeMagnitude; // 初期のシェイク強度を保存
+            initialShakeMagnitude = shakeMagnitude;
             initDistance = distance;    
         }
 
@@ -116,7 +116,7 @@ namespace TechC
             {
                 distance = Mathf.Lerp(initialDistance, newDistance, elapsedTime / duration);
                 elapsedTime += Time.deltaTime;
-                Debug.Log($"Distance updating: {distance}");
+                //Debug.Log($"Distance updating: {distance}");
 
                 yield return null;
             }

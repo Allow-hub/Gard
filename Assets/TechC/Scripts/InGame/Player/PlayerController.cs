@@ -71,8 +71,8 @@ namespace TechC
             if (playerInputManager.IsSwinging)
                 ChangeSwingingState();
 
-            if (playerInputManager.IsJumping)
-                ChangeJumpingState();
+            //if (playerInputManager.IsJumping)
+            //    ChangeJumpingState();
             StateHandler();
         }
 
@@ -84,7 +84,6 @@ namespace TechC
 
         private void HandleMovement()
         {
-            if (currentState == PlayerState.Swinging) return;   
             Vector3 inputVector = playerInputManager.InputVector;
             bool isMoving = inputVector != Vector3.zero;
             bool isDashing = playerInputManager.IsDashing;
@@ -176,7 +175,7 @@ namespace TechC
                 case PlayerState.Jumping:
                     break;
                 case PlayerState.Swinging:
-                    swinging.StartSwing();
+                    //swinging.StartSwing();
                     break;
                 case PlayerState.Freezing:
                     break;
