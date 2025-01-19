@@ -60,18 +60,7 @@ namespace TechC
         {
             CheckForSwingPoint();
 
-            if (playerInputManager.IsSwinging)
-            {
-                StartSwing();
-                isSwinging = true;
-
-                //if (joint != null) OdmGearMovement();
-            }
-            else
-            {
-                StopSwing();
-
-            }
+            
 
         }
         private void LateUpdate()
@@ -88,8 +77,9 @@ namespace TechC
         }
         public void StartSwing()
         {
-
             if (predictionHit.point == Vector3.zero) return;
+            isSwinging = true;
+
             StartCoroutine(Stopping());
             anim.SetBool(animName, true);
             swingPoint = predictionHit.point;
@@ -117,13 +107,11 @@ namespace TechC
             joint.minDistance = distanceFromPoint * distanceFromPointMin;
             currentGrapplePosition = gunTip.position;
 
-         }
+        }
 
         private IEnumerator Stopping()
         {
-            playerController.ChangeFreezingState();
             yield return new WaitForSeconds(0.3f);
-            playerController.ChangeFreezingState();
             // スウィングポイントに向かって力を加える
             Vector3 directionToSwingPoint = (swingPoint - player.position).normalized;
             playerController.PlayerAddForce(directionToSwingPoint, forwardThurstForce, ForceMode.Impulse);
@@ -138,30 +126,24 @@ namespace TechC
             lr.positionCount = 0;
             Destroy(joint);
         }
-        //private void OdmGearMovement()
-        //{
-        //    if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
-        //    if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
-        //    if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * forwardThurstForce * Time.deltaTime * 10, ForceMode.Force);
+        public void SwingMove()
+        {
+            if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
+            if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
+            if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * forwardThurstForce * Time.deltaTime * 10, ForceMode.Force);
 
-        //    if (Input.GetKey(KeyCode.Space))
-        //    {
-        //        Vector3 directionToPoint = swingPoint - transform.position;
-        //        rb.AddForce(directionToPoint.normalized * forwardThurstForce * Time.deltaTime * 2);
+            if (Input.GetKey(KeyCode.Space))
+            {
+                Vector3 directionToPoint = swingPoint - transform.position;
+                rb.AddForce(directionToPoint.normalized * forwardThurstForce * Time.deltaTime * 2);
 
-        //        float distanceFromPoint = Vector3.Distance(transform.position, swingPoint);
-        //        joint.maxDistance = distanceFromPoint * 0.8f;
-        //        joint.minDistance = distanceFromPoint * 0.25f;
-        //    }
-        //    if (Input.GetKey(KeyCode.S))
-        //    {
-        //        float extendedDistanceFromPoint = Vector3.Distance(transform.position, swingPoint) + extendCableSpeed;
+                float distanceFromPoint = Vector3.Distance(transform.position, swingPoint);
+                joint.maxDistance = distanceFromPoint * 0.8f;
+                joint.minDistance = distanceFromPoint * 0.25f;
+            }
+            
 
-        //        joint.maxDistance = extendedDistanceFromPoint * 0.8f;
-        //        joint.minDistance = extendedDistanceFromPoint * 0.25f;
-        //    }
-
-        //}
+        }
         private void CheckForSwingPoint()
         {
             if (joint != null) return;

@@ -251,7 +251,8 @@ MonoBehaviour:
   dashSpeedMultiplier: 2
   dashCameraDistance: 1
   dashCameraDuration: 0.5
-  jumpForce: 1
+  jumpStoppingTime: 0.3
+  jumpForce: 2
   jumpCoolTime: 1
   orientation: {fileID: 261622094}
   smokeEffect: {fileID: 1789470172}
@@ -260,6 +261,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   groundCheckDistance: 1
+  currentState: 0
 --- !u!114 &71379014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -948,7 +950,7 @@ Transform:
   m_GameObject: {fileID: 811213985}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.135, y: 0.569, z: -0.224}
+  m_LocalPosition: {x: 0.228, y: 0.569, z: -0.251}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1112,7 +1114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 811213986}
   distance: 2
-  height: 0.4
+  height: 0.3
   shakeDuration: 0.5
   shakeMagnitude: 0.3
   dampingSpeed: 1
