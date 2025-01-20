@@ -13,7 +13,7 @@ namespace TechC
         [SerializeField] private float shakeMagnitude = 0.3f; // シェイクの強度
         [SerializeField] private float dampingSpeed = 1.0f; // 減衰スピード
         [SerializeField] private Vector3 additionalOffset = new Vector3(0.5f, 0.2f, 0);
-
+        [SerializeField] private GameObject speedEffect;
         private float initDistance;
         private Camera cam;
         private float rotationX = 0.0f;
@@ -22,7 +22,7 @@ namespace TechC
         private const float maxYAngle = 90.0f;
         private Vector3 shakeOffset = Vector3.zero;
         private float initialShakeMagnitude;
-
+        private float initFov;
 
         [Header("WallCheck")]
         // 現在の位置
@@ -42,10 +42,12 @@ namespace TechC
 
         private Coroutine distanceChangeCoroutine;
         private Coroutine shakeCoroutine;
-
+        private Coroutine fovChangeCoroutine;
         private void Start()
         {
+            SetSpeedEffect(false);
             cam = Camera.main;
+            initFov = cam.fieldOfView;
             //player = FindPlayerTransform();
             initialShakeMagnitude = shakeMagnitude;
             initDistance = distance;    
@@ -124,7 +126,37 @@ namespace TechC
             distance = newDistance; // 最終的に直接設定
         }
 
-        public void TriggerShake()
+        public float GetInitFov() => initFov;
+
+        // FOVを滑らかに変化させるメソッド
+        public void ChangeFOV(float targetFOV, float duration)
+        {
+            if (fovChangeCoroutine != null)
+            {
+                StopCoroutine(fovChangeCoroutine);  // 前のコルーチンが実行中なら停止
+            }
+            fovChangeCoroutine = StartCoroutine(ChangeFOVCoroutine(targetFOV, duration));
+        }
+
+        // FOV変更のコルーチン
+        private IEnumerator ChangeFOVCoroutine(float targetFOV, float duration)
+        {
+            float startFOV = cam.fieldOfView;  // 現在のFOV
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                // 線形補間でFOVを変更
+                cam.fieldOfView = Mathf.Lerp(startFOV, targetFOV, elapsedTime / duration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // 最後に目標のFOVに設定
+            cam.fieldOfView = targetFOV;
+        }
+    
+    public void TriggerShake()
         {
             if (shakeCoroutine != null)
             {
@@ -166,6 +198,8 @@ namespace TechC
                 return false; // 壁に衝突しなかった
             }
         }
+
+        public void SetSpeedEffect(bool value)=>speedEffect.gameObject.SetActive(value);
 
         private Transform FindPlayerTransform()
         {

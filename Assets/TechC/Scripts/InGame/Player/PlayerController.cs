@@ -29,12 +29,16 @@ namespace TechC
         [SerializeField] private float decelerationFactor = 2f;
 
         [SerializeField] private float walkCameraDuration = 0.5f;
+        [SerializeField] private float walkFovDuration = 0.5f;
+
         private Camera playerCamera;
 
         [Header("Dash")]
         [SerializeField] private float dashSpeedMultiplier = 2f;
         [SerializeField] private float dashCameraDistance = 0.5f;
         [SerializeField] private float dashCameraDuration = 0.5f;
+        [SerializeField] private float dashFovDuration = 0.5f;
+        [SerializeField] private float dashFov = 0.5f;
 
         [Header("Jump")]
         [SerializeField] private float jumpStoppingTime = 0.3f;
@@ -45,6 +49,8 @@ namespace TechC
         [SerializeField] private float height = 2f;
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private float groundCheckDistance = 0.1f;
+        [SerializeField] private float jumpFov = 80;
+        [SerializeField] private float jumpFovDuration = 1;
 
         [SerializeField] private PlayerState currentState = PlayerState.Idle;
         private PlayerState lastState = PlayerState.Moving;
@@ -86,7 +92,7 @@ namespace TechC
             Vector3 inputVector = playerInputManager.InputVector;
             bool isMoving = inputVector != Vector3.zero;
             bool isDashing = playerInputManager.IsDashing;
-            if (playerInputManager.IsSwinging) return;
+            if (playerInputManager.IsSwinging||playerInputManager.IsJumping) return;
 
             if (isMoving)
             {
@@ -124,6 +130,11 @@ namespace TechC
                 float targetDistance = currentIsDashing ? dashCameraDistance : chaseCamera.GetInitDistance();
                 float targetDuration = currentIsDashing ? dashCameraDuration : walkCameraDuration;
                 chaseCamera.UpCamera(targetDuration, targetDistance);
+                float targetFov = currentIsDashing ? dashFov : chaseCamera.GetInitFov();
+                float targetFovDuration = currentIsDashing ? dashFovDuration : walkFovDuration;
+                chaseCamera.ChangeFOV(targetFov, targetFovDuration);
+
+                chaseCamera.SetSpeedEffect(currentIsDashing);
                 wasDashing = currentIsDashing;
             }
             // アニメーションの状態を毎フレーム更新
@@ -161,7 +172,9 @@ namespace TechC
 
             if (currentState == lastState) return;
             if (playerInputManager.IsSwinging)
+            {
                 ChangeSwingingState();
+            }
             else
             {
                 swinging.StopSwing();
@@ -205,31 +218,25 @@ namespace TechC
         private void Jump()
         {
 
-            if (!canJump || !IsGrounded()) return;
+            if (!canJump /*|| !IsGrounded()*/) return;
             StartCoroutine(JumpCooldown());
         }
-        private void OnDrawGizmos()
-        {
-            if (Application.isPlaying)
-            {
-                Vector3 jumpDirection = (Camera.main.transform.forward + Vector3.up).normalized;
-                Gizmos.color = Color.green;
-                Gizmos.DrawRay(transform.position, jumpDirection * jumpForce);  // ジャンプ方向を描画
-            }
-        }
+    
 
         private IEnumerator JumpCooldown()
         {
             //メリハリのための静止
             rb.velocity = Vector3.zero;
             yield return new WaitForSeconds(jumpStoppingTime);
+            chaseCamera.ChangeFOV(jumpFov,jumpFovDuration);
             //ジャンプ
             Vector3 jumpDirection = (Camera.main.transform.forward + Vector3.up).normalized;
 
             rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
             smokeEffect.SetActive(true);
             yield return new WaitForSeconds(jumpCoolTime);
-            ChangeState(PlayerState.Idle);
+            chaseCamera.ChangeFOV(chaseCamera.GetInitFov(), jumpFovDuration);
+
             smokeEffect.SetActive(false);
             canJump = true;
         }
