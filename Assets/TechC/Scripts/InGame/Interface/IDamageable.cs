@@ -6,11 +6,8 @@ namespace TechC.Interface
 {
     public interface IDamageable
     {
-        public interface IDamageable
-        {
-            void TakeDamage(float damage);
-            void Death();
+        void TakeDamage(int damage);
+        void Death();
 
-        }
     }
 }
