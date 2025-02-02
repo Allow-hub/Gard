@@ -153,7 +153,7 @@ namespace TechC
             Vector3 sphereCastDirection = cam.forward;
 
             // SphereCastの方向を可視化
-            Debug.DrawRay(sphereCastOrigin, sphereCastDirection * maxSwingDistance, Color.red);  // 赤い線でキャスト方向を表示
+            //Debug.DrawRay(sphereCastOrigin, sphereCastDirection * maxSwingDistance, Color.red);  // 赤い線でキャスト方向を表示
 
             Physics.SphereCast(sphereCastOrigin, predictionShereCastRadius, sphereCastDirection, out sphereCastHit, maxSwingDistance, whatIsGrappleable);
 
