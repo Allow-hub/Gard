@@ -71,7 +71,7 @@ namespace TechC
                 rb.velocity = Vector3.zero;
                 return;
             }
-
+            AnimationHandler();
             //Vector3 forward = new Vector3(playerCamera.transform.forward.x, playerCamera.transform.forward.x, playerCamera.transform.forward.z).normalized;
             //if (forward != Vector3.zero)
             //{
@@ -105,7 +105,7 @@ namespace TechC
             }
         }
 
-
+     
 
 
         private void MovePlayer(Vector3 inputVector, bool currentIsDashing)
@@ -137,11 +137,81 @@ namespace TechC
                 chaseCamera.SetSpeedEffect(currentIsDashing);
                 wasDashing = currentIsDashing;
             }
+
+     
             // アニメーションの状態を毎フレーム更新
-            if (playerInputManager.InputVector != Vector3.zero)
-                anim.SetBool("IsWalking", !currentIsDashing);
-            anim.SetBool("IsDashing", currentIsDashing);
+            //if (playerInputManager.InputVector != Vector3.zero)
+            //    anim.SetBool("IsWalking", !currentIsDashing);
+            //anim.SetBool("IsDashing", currentIsDashing);
         }
+
+        private void AnimationHandler()
+        {
+            // ゲームがプレイ可能でない場合は処理を行わない
+            if (!GameManager.I.GetCanPlay())
+                return;
+
+            bool grounded = IsGrounded();
+
+            // 浮いている（地上にいない）場合は、IsFloating を true にして、他のアニメーション更新は行わない
+            if (!grounded)
+            {
+                anim.SetBool("IsFloating", true);
+                anim.SetBool("IsWalking", false);
+                anim.SetBool("IsDashing", false);
+
+                return;
+            }
+            else
+            {
+                // 地上に着いたら、IsFloating を false にする
+                anim.SetBool("IsFloating", false);
+
+                // Swinging状態でなければ、すべての Bool パラメーターをリセット
+                if (currentState != PlayerState.Swinging)
+                {
+                    foreach (AnimatorControllerParameter param in anim.parameters)
+                    {
+                        if (param.type == AnimatorControllerParameterType.Bool)
+                        {
+                            anim.SetBool(param.name, false);
+                        }
+                    }
+                }
+            }
+
+            // 入力状態などに基づいたアニメーションの更新
+
+            bool isMoving = playerInputManager.InputVector != Vector3.zero;
+            bool isDashing = playerInputManager.IsDashing;
+            bool isSwinging = playerInputManager.IsSwinging;
+            bool isJumping = playerInputManager.IsJumping;
+
+            // Swinging 中は他の状態に干渉しない
+            if (isSwinging)
+            {
+                anim.SetBool("IsSwinging", true);
+            }
+            else if (isJumping)
+            {
+                anim.SetBool("IsJumping", true);
+            }
+            else if (isMoving)
+            {
+                if (!grounded) return;
+                // 移動中の場合、ダッシュかウォークかで分岐
+                if (isDashing)
+                {
+                    anim.SetBool("IsDashing", true);
+                }
+                else
+                {
+                    anim.SetBool("IsWalking", true);
+                }
+            }
+            // 移動していない場合は、リセットされているので、Animator のデフォルトステート（Idle）が再生される
+        }
+
 
         //ステート中の更新処理
         private void UpdateState()
@@ -198,8 +268,8 @@ namespace TechC
             switch (newState)
             {
                 case PlayerState.Idle:
-                    anim.SetBool("IsWalking", false);
-                    anim.SetBool("IsDashing", false);
+                    //anim.SetBool("IsWalking", false);
+                    //anim.SetBool("IsDashing", false);
 
                     break;
                 case PlayerState.Moving:
