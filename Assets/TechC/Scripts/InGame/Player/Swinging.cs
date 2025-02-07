@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace TechC
@@ -111,6 +110,7 @@ namespace TechC
 
         private IEnumerator Stopping()
         {
+            //playerController.StopPlayer(0.3f);
             yield return new WaitForSeconds(0.3f);
             // スウィングポイントに向かって力を加える
             Vector3 directionToSwingPoint = (swingPoint - player.position).normalized;
@@ -126,24 +126,24 @@ namespace TechC
             lr.positionCount = 0;
             Destroy(joint);
         }
-        public void SwingMove()
-        {
-            if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
-            if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
-            if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * forwardThurstForce * Time.deltaTime * 10, ForceMode.Force);
+        //public void SwingMove()
+        //{
+        //    if (Input.GetKey(KeyCode.D)) rb.AddForce(orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
+        //    if (Input.GetKey(KeyCode.A)) rb.AddForce(-orientation.right * horizontalThrustForce * Time.deltaTime * 2, ForceMode.Force);
+        //    if (Input.GetKey(KeyCode.W)) rb.AddForce(orientation.forward * forwardThurstForce * Time.deltaTime * 10, ForceMode.Force);
 
-            if (Input.GetKey(KeyCode.Space))
-            {
-                Vector3 directionToPoint = swingPoint - transform.position;
-                rb.AddForce(directionToPoint.normalized * forwardThurstForce * Time.deltaTime * 2);
+        //    if (Input.GetKey(KeyCode.Space))
+        //    {
+        //        Vector3 directionToPoint = swingPoint - transform.position;
+        //        rb.AddForce(directionToPoint.normalized * forwardThurstForce * Time.deltaTime * 2);
 
-                float distanceFromPoint = Vector3.Distance(transform.position, swingPoint);
-                joint.maxDistance = distanceFromPoint * 0.8f;
-                joint.minDistance = distanceFromPoint * 0.25f;
-            }
+        //        float distanceFromPoint = Vector3.Distance(transform.position, swingPoint);
+        //        joint.maxDistance = distanceFromPoint * 0.8f;
+        //        joint.minDistance = distanceFromPoint * 0.25f;
+        //    }
             
 
-        }
+        //}
         private void CheckForSwingPoint()
         {
             if (joint != null) return;

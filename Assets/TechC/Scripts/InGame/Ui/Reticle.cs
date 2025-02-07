@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Coffee.UIEffects;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,12 +10,16 @@ namespace TechC
     {
         [Header("Reference")]
         [SerializeField] private Image reticle;
+        [SerializeField] private UIEffect uiEffect;
         private RectTransform reticleTrans;
 
         [Header("Setting")]
         [SerializeField] private float distance = 1f;
         [SerializeField] private float sphereRadius = 3f;
         [SerializeField] private LayerMask focusLayer;
+        [SerializeField] private Color focusColor,focusColor_Effect;
+        private Color initColor, initColor_Effect;
+
 
         private Transform cam;
         [SerializeField] private Canvas canvas;
@@ -36,6 +41,9 @@ namespace TechC
         {
             cam = Camera.main.transform;
             reticleTrans = reticle.GetComponent<RectTransform>();
+
+            initColor = reticle.color;
+            initColor_Effect = uiEffect.edgeColor;
 
             idleCenter = Vector2.zero; // 画面中央を中心
         }
@@ -67,6 +75,10 @@ namespace TechC
 
             if (realHitPoint != Vector3.zero)
             {
+                if (reticle.color != focusColor)
+                    reticle.color = focusColor;
+                if (uiEffect.edgeColor != focusColor)
+                    uiEffect.edgeColor = focusColor_Effect;
                 // ヒット時はリティクルを固定
                 Vector3 screenPos = Camera.main.WorldToScreenPoint(realHitPoint);
                 Vector2 localPoint;
@@ -78,6 +90,10 @@ namespace TechC
             }
             else
             {
+                if (reticle.color != initColor)
+                    reticle.color = initColor;
+                if (uiEffect.edgeColor != initColor_Effect)
+                    uiEffect.edgeColor = initColor_Effect;
                 // 不規則な8の字の動き
                 idleTime += Time.deltaTime * idleSpeed;
 

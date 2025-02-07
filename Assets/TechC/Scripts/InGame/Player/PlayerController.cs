@@ -31,6 +31,10 @@ namespace TechC
         [SerializeField] private float walkCameraDuration = 0.5f;
         [SerializeField] private float walkFovDuration = 0.5f;
 
+        [SerializeField] private int changeGravity = 13;
+        [SerializeField] private float changeDuration = 2f; //重力を変える期間
+        [SerializeField] private float changeGravityTime = 1f; //　重力を変え始める時間
+
         private Camera playerCamera;
 
         [Header("Dash")]
@@ -144,6 +148,7 @@ namespace TechC
             //    anim.SetBool("IsWalking", !currentIsDashing);
             //anim.SetBool("IsDashing", currentIsDashing);
         }
+
 
         private void AnimationHandler()
         {
@@ -296,7 +301,7 @@ namespace TechC
         private IEnumerator JumpCooldown()
         {
             //メリハリのための静止
-            rb.velocity = Vector3.zero;
+            StopPlayer(jumpStoppingTime);
             yield return new WaitForSeconds(jumpStoppingTime);
             chaseCamera.ChangeFOV(jumpFov,jumpFovDuration);
             //ジャンプ
@@ -318,6 +323,20 @@ namespace TechC
         }
 
         public void PlayerAddForce(Vector3 dir, float force, ForceMode forceMode) => rb.AddForce(dir * force, forceMode);
+
+        public void StopPlayer(float value)
+        {
+            StartCoroutine(StopDelay(value));
+        }
+
+        private IEnumerator StopDelay(float value)
+        {
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+            yield return new WaitForSeconds(value);
+            rb.constraints =RigidbodyConstraints.None;
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        }
         public void ChangeIdleState() => ChangeState(PlayerState.Idle);
         public void ChangeMovingState() => ChangeState(PlayerState.Moving);
         public void ChangeSwingingState() => ChangeState(PlayerState.Swinging);
