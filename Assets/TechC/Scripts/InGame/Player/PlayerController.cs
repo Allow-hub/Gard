@@ -27,13 +27,13 @@ namespace TechC
         [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float rotationSpeed = 2f;
         [SerializeField] private float decelerationFactor = 2f;
-
+        [SerializeField] private float maxSpeed = 20f;
         [SerializeField] private float walkCameraDuration = 0.5f;
         [SerializeField] private float walkFovDuration = 0.5f;
 
-        [SerializeField] private int changeGravity = 13;
-        [SerializeField] private float changeDuration = 2f; //重力を変える期間
-        [SerializeField] private float changeGravityTime = 1f; //　重力を変え始める時間
+        //[SerializeField] private int changeGravity = 13;
+        //[SerializeField] private float changeDuration = 2f; //重力を変える期間
+        //[SerializeField] private float changeGravityTime = 1f; //　重力を変え始める時間
 
         private Camera playerCamera;
 
@@ -61,6 +61,11 @@ namespace TechC
 
         private bool canJump = true;
         private bool wasDashing;
+
+        private bool isIncreasingDownwardForce = false;
+        [SerializeField] private float maxAdditionalDownwardForce = 20f; // 追加する下向きの力の最大値（例：20）
+        private Coroutine downwardForceCoroutine = null;
+
         private void Awake()
         {
             playerCamera = Camera.main;
@@ -83,12 +88,19 @@ namespace TechC
             //}
 
             StateHandler();
+            // 地上にいなければ、下向きの力を徐々に増加させる処理を開始する
+            if (!IsGrounded() && !isIncreasingDownwardForce)
+            {
+                downwardForceCoroutine = StartCoroutine(ApplyIncreasingDownwardForce());
+            }
         }
 
         private void FixedUpdate()
         {
             if (!GameManager.I.GetCanPlay() || currentState == PlayerState.Freezing) return;
             HandleMovement();
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+
         }
 
         private void HandleMovement()
@@ -294,6 +306,8 @@ namespace TechC
         {
 
             if (!canJump /*|| !IsGrounded()*/) return;
+            ResetDownwardForce();
+
             StartCoroutine(JumpCooldown());
         }
     
@@ -336,6 +350,48 @@ namespace TechC
             rb.constraints =RigidbodyConstraints.None;
             rb.constraints = RigidbodyConstraints.FreezeRotation;
 
+        }
+
+        /// <summary>
+        /// 空中にいる間、1.5秒の待機後、3秒かけて下向きの追加力を徐々に増加させるコルーチン
+        /// </summary>
+        private IEnumerator ApplyIncreasingDownwardForce()
+        {
+            isIncreasingDownwardForce = true;
+
+            // 1.5秒待機（空中でしばらく浮いた後）
+            yield return new WaitForSeconds(1.5f);
+
+            float duration = 3f; // 追加力を増加させる期間
+            float elapsed = 0f;
+
+            // 3秒かけて力を徐々に増加させる
+            while (elapsed < duration && !IsGrounded())
+            {
+                // 0から maxAdditionalDownwardForce まで線形補間
+                float t = elapsed / duration;
+                float currentForce = Mathf.Lerp(0f, maxAdditionalDownwardForce, t);
+
+              
+                rb.AddForce(Vector3.down * currentForce, ForceMode.Acceleration);
+
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            isIncreasingDownwardForce = false;
+        }
+        /// <summary>
+        /// 下向きの追加力のコルーチンをリセットするメソッド
+        /// </summary>
+        public void ResetDownwardForce()
+        {
+            if (downwardForceCoroutine != null)
+            {
+                StopCoroutine(downwardForceCoroutine);
+                downwardForceCoroutine = null;
+            }
+            isIncreasingDownwardForce = false;
         }
         public void ChangeIdleState() => ChangeState(PlayerState.Idle);
         public void ChangeMovingState() => ChangeState(PlayerState.Moving);
