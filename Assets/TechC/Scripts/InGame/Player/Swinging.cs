@@ -86,11 +86,11 @@ namespace TechC
             if (predictionHit.collider != null && predictionHit.collider.CompareTag("Support"))
             {
                 // 特定のタグを持っている場合の別処理を実行
-                Debug.Log("特別なスイング対象がヒットしました！");
+                //Debug.Log("特別なスイング対象がヒットしました！");
                 StartSupport();
                 return;
             }
-
+       
             isSwinging = true;
             StartCoroutine(Stopping());
             anim.SetBool(animName, true);
@@ -128,6 +128,7 @@ namespace TechC
             lr.positionCount = 0;
             Destroy(joint);
         }
+
 
         // Support処理を行うメソッド（クールダウン付き）
         private void StartSupport()
@@ -224,6 +225,10 @@ namespace TechC
             if (!isDrawingGizmo) return;
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(predictionHit.point, predictionShereCastRadius);
+        }
+        public GameObject GetHitObject()
+        {
+            return predictionHit.collider != null ? predictionHit.collider.gameObject : null;
         }
     }
 }

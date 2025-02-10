@@ -6,6 +6,7 @@ namespace TechC
 {
     public class ChaseCamera : MonoBehaviour
     {
+        [SerializeField] private Rigidbody rb;
         [SerializeField] private Transform player;
         [SerializeField] private float distance = 5.0f;
         [SerializeField] private float height = 2.0f;
@@ -14,6 +15,8 @@ namespace TechC
         [SerializeField] private float dampingSpeed = 1.0f; // 減衰スピード
         [SerializeField] private Vector3 additionalOffset = new Vector3(0.5f, 0.2f, 0);
         [SerializeField] private GameObject speedEffect;
+
+        [SerializeField] private float rbSpeed = 70;
         private float initDistance;
         private Camera cam;
         private float rotationX = 0.0f;
@@ -96,6 +99,17 @@ namespace TechC
 
             // カメラの回転を更新
             cam.transform.LookAt(player.position + Vector3.up * height);
+
+            if(rb.velocity.magnitude >= rbSpeed)
+            {
+                if (!speedEffect.activeSelf)
+                    speedEffect.SetActive(true);
+            }
+            else
+            {
+                if (speedEffect.activeSelf)
+                    speedEffect.SetActive(false);
+            }
         }
 
 

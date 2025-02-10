@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Support
+  - NormalEnemy
+  - Weapon
   layers:
   - Default
   - TransparentFX
