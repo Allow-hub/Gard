@@ -1,0 +1,21 @@
+# ProBuilder 5.2.2
+# https://unity3d.com/unity/features/worldbuilding/probuilder
+# 24-04-2024 23:48:37
+
+mtllib ./Prism_(2)_(1).mtl
+o Prism_(2) (1)
+
+g Prism_(2) (1)
+v 0.3790199 -0.4999999 -5.329071E-15
+v 0.2434607 0.4999999 -5.329071E-15
+v -0.37902 -0.4999999 -5.329071E-15
+
+vt -1.101617 0.1113762
+vt -0.6016175 1.111376
+vt -0.1016175 0.1113762
+
+vn 0 0 -1
+
+usemtl Rocket
+f 3/3/1 2/2/1 1/1/1
+
