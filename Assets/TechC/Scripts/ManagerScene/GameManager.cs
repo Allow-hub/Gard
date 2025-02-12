@@ -14,6 +14,8 @@ namespace TechC
         {
             Title,
             Menu,
+            Tutorial,
+            InGame,
             Clear,
             GameOver
         }
@@ -35,7 +37,7 @@ namespace TechC
             StateHandler();
         }
 
-        private void SetState(GameState state)
+        public void SetState(GameState state)
         {
             currentState = state;
             switch (state)
@@ -48,6 +50,12 @@ namespace TechC
                 case GameState.Clear:
                     break;
                 case GameState.GameOver:
+                    break;
+                case GameState.Tutorial:
+                    TutorialInit();
+                    break;
+                case GameState.InGame:
+                    InGameInit();
                     break;
             }
         }
@@ -106,6 +114,17 @@ namespace TechC
         public bool ChangeCanPlay() => CanPlay = !CanPlay;
 
         private void TitleInit() => ChangeCursorMode(false, CursorLockMode.Locked);
+        private void TutorialInit()
+        {
+            ChangeCursorMode(false, CursorLockMode.Locked);
+        }
+        private void InGameInit()
+        {
+            ChangeCursorMode(false, CursorLockMode.Locked);
+        }
+
+        public void ChangeTutorialState() => SetState(GameState.Tutorial);
+        public void ChangeInGameState() => SetState(GameState.InGame);
     }
 
 }

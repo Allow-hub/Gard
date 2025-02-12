@@ -18,9 +18,13 @@ namespace TechC
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private PlayerInputManager playerInputManager;
+        [SerializeField] private PlayerAttack playerAttack;
         [SerializeField] private Swinging swinging;
         [SerializeField] private ChaseCamera chaseCamera;
         [SerializeField] private Animator anim;
+
+        [SerializeField] private bool isDebug = true;
+        [SerializeField] private GameManager.GameState debugState;
         private Rigidbody rb;
 
         [Header("Movement")]
@@ -71,6 +75,12 @@ namespace TechC
             playerCamera = Camera.main;
             rb = GetComponent<Rigidbody>();
             smokeEffect.SetActive(false);
+        }
+        private void Start()
+        {
+            if (GameManager.I == null) return;
+            if (!isDebug) return;
+            GameManager.I.SetState(debugState);
         }
 
         private void Update()
@@ -304,31 +314,47 @@ namespace TechC
 
         private void Jump()
         {
-
+            if (playerInputManager.IsAttacking|| !playerAttack.GetAttacking()) return;
             if (!canJump /*|| !IsGrounded()*/) return;
             ResetDownwardForce();
 
             StartCoroutine(JumpCooldown());
         }
-    
+
 
         private IEnumerator JumpCooldown()
         {
-            //メリハリのための静止
+            // メリハリのための静止
             StopPlayer(jumpStoppingTime);
             yield return new WaitForSeconds(jumpStoppingTime);
-            chaseCamera.ChangeFOV(jumpFov,jumpFovDuration);
-            //ジャンプ
-            Vector3 jumpDirection = (Camera.main.transform.forward + Vector3.up).normalized;
 
+            if (chaseCamera != null && chaseCamera.gameObject.activeInHierarchy)
+            {
+                chaseCamera.ChangeFOV(jumpFov, jumpFovDuration);
+            }
+
+            // カメラがアクティブでない場合の処理
+            Vector3 jumpDirection = Vector3.up; // デフォルトは上方向
+            if (Camera.main != null && Camera.main.gameObject.activeInHierarchy)
+            {
+                jumpDirection = (Camera.main.transform.forward + Vector3.up).normalized;
+            }
+
+            // ジャンプ
             rb.AddForce(jumpDirection * jumpForce, ForceMode.Impulse);
             smokeEffect.SetActive(true);
+
             yield return new WaitForSeconds(jumpCoolTime);
-            chaseCamera.ChangeFOV(chaseCamera.GetInitFov(), jumpFovDuration);
+
+            if (chaseCamera != null && chaseCamera.gameObject.activeInHierarchy)
+            {
+                chaseCamera.ChangeFOV(chaseCamera.GetInitFov(), jumpFovDuration);
+            }
 
             smokeEffect.SetActive(false);
             canJump = true;
         }
+
 
         private bool IsGrounded()
         {

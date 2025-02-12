@@ -79,6 +79,7 @@ namespace TechC
                     reticle.color = focusColor;
                 if (uiEffect.edgeColor != focusColor)
                     uiEffect.edgeColor = focusColor_Effect;
+                if (Camera.main == null) return;
                 // ヒット時はリティクルを固定
                 Vector3 screenPos = Camera.main.WorldToScreenPoint(realHitPoint);
                 Vector2 localPoint;

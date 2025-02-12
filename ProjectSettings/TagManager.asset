@@ -7,6 +7,7 @@ TagManager:
   - Support
   - NormalEnemy
   - Weapon
+  - TutorialInitPos
   layers:
   - Default
   - TransparentFX
