@@ -8,6 +8,7 @@ namespace TechC
     public class GameManager : Singleton<GameManager>
     {
         [SerializeField] private int targetFrameRate = 144;
+        [SerializeField] private FadeManager fadeManager;
         public float sensitivity = 2;
         private bool CanPlay = true;
         public enum GameState
@@ -110,10 +111,13 @@ namespace TechC
             }
         }
 
+        public FadeManager GetFadeManager() => fadeManager;
+        public void Fade(float duration) => fadeManager.ShotFade(duration);
+
         public bool GetCanPlay() => CanPlay;
         public bool ChangeCanPlay() => CanPlay = !CanPlay;
 
-        private void TitleInit() => ChangeCursorMode(false, CursorLockMode.Locked);
+        private void TitleInit() => ChangeCursorMode(transform, CursorLockMode.None);
         private void TutorialInit()
         {
             ChangeCursorMode(false, CursorLockMode.Locked);
@@ -123,6 +127,7 @@ namespace TechC
             ChangeCursorMode(false, CursorLockMode.Locked);
         }
 
+        public void ChangeTitleState() => SetState(GameState.Title);
         public void ChangeTutorialState() => SetState(GameState.Tutorial);
         public void ChangeInGameState() => SetState(GameState.InGame);
     }
