@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TechC;
 
 namespace TechC
 {
     public class TutorialManager : MonoBehaviour
     {
+        [SerializeField] private PlayerController playerController;
         [SerializeField] private ObjectPool objectPool;
         [SerializeField] private GameObject player;
         [SerializeField] private Transform tutInitPos, inGameInitPos;
@@ -13,6 +15,9 @@ namespace TechC
         [SerializeField] private Transform[] enemyPos;
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private Transform minY;
+        [SerializeField] private Transform warpPos;
+        [SerializeField] private float warpDuration = 3f;
+        private bool isWarping = false;
 
         private void Start()
         {
@@ -25,7 +30,7 @@ namespace TechC
 
         private void Update()
         {
-            if (GameManager.I.currentState == GameManager.GameState.Tutorial)
+            if (GameManager.I.currentState == GameManager.GameState.Tutorial&&!isWarping)
             {
                 if (player.transform.position.y <= minY.position.y)
                 {
@@ -54,5 +59,29 @@ namespace TechC
                 gameObject.SetActive(false);
             }
         }
+
+        public void ChangeInGame()
+        {
+            isWarping = true;
+            player.transform.position = warpPos.position;
+
+            // ワープ完了後、初期位置に戻す
+            this.DelayMethod(warpDuration, () =>
+            {
+                player.transform.position = inGameInitPos.position;
+                GameManager.I.ChangeInGameState();
+            });
+
+            float delay = 0.1f;
+
+            playerController.StopPlayer(warpDuration);
+
+            // 非アクティブ化を一番最後に実行
+            this.DelayMethod(warpDuration + delay, () =>
+            {
+                gameObject.SetActive(false);
+            });
+        }
+
     }
 }

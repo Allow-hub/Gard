@@ -15,7 +15,7 @@ namespace TechC
         {
             if (uIEffect != null)
             {
-                uIEffect.transitionRate = minCount; // 最初は透明にする
+                uIEffect.transitionRate = maxCount; // 最初は透明にする
             }
         }
 

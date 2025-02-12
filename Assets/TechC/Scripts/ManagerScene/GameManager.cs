@@ -11,6 +11,8 @@ namespace TechC
         [SerializeField] private FadeManager fadeManager;
         public float sensitivity = 2;
         private bool CanPlay = true;
+        private ObjectPool enemyAndEffectPool;
+        private ObjectPool soundPool;
         public enum GameState
         {
             Title,
@@ -121,11 +123,24 @@ namespace TechC
         private void TutorialInit()
         {
             ChangeCursorMode(false, CursorLockMode.Locked);
+            if (soundPool == null || enemyAndEffectPool == null)
+            {
+                soundPool = GameObject.Find("SoundPool").GetComponent<ObjectPool>();
+                enemyAndEffectPool = GameObject.Find("EnemyPool").GetComponent<ObjectPool>();
+            }
         }
         private void InGameInit()
         {
             ChangeCursorMode(false, CursorLockMode.Locked);
+            if (soundPool == null || enemyAndEffectPool == null)
+            {
+                Debug.Log("A");
+                soundPool = GameObject.Find("SoundPool").GetComponent<ObjectPool>();
+                enemyAndEffectPool = GameObject.Find("EnemyPool").GetComponent<ObjectPool>();
+            }
         }
+        public ObjectPool GetSoundPool() => soundPool;
+        public ObjectPool GetEnemyPool() => enemyAndEffectPool;
 
         public void ChangeTitleState() => SetState(GameState.Title);
         public void ChangeTutorialState() => SetState(GameState.Tutorial);

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,5 +19,7 @@ namespace TechC
         {
             audioSource.volume = volume;
         }
+
+        public float GetSEVolume() => audioSource.volume;
     }
 }

@@ -8,10 +8,23 @@ namespace TechC
     {
         [SerializeField] private GameObject nexObj;
         [SerializeField] private bool isLast;
+        [SerializeField] private TutorialManager tutorialManager;
         private bool once = false;
+
+        private void OnValidate()
+        {
+            tutorialManager = FindAnyObjectByType<TutorialManager>();
+        }
+
         private void OnTriggerEnter(Collider other)
         {
             if (once) return;
+            if (isLast)
+            {
+                tutorialManager.ChangeInGame();
+                once =true; 
+                return;
+            }
             if (nexObj != null)
             {
                 if (other.gameObject.CompareTag("Player"))
@@ -22,11 +35,6 @@ namespace TechC
                 }
             }
 
-            if(isLast)
-            {
-                GameManager.I.ChangeInGameState();
-            }
-            once = true;
         }
     }
 }
