@@ -11,7 +11,7 @@ namespace TechC
         [SerializeField] private float moveSpeed = 1f;
    
 
-        private void Update()
+        private void FixedUpdate()
         {
             // フェアリーの位置がターゲット位置に向かって動く
             transform.position = Vector3.Lerp(transform.position, fairyPos.position, Time.deltaTime * moveSpeed);

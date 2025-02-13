@@ -1,9 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-
+using TechC.Interface;
 namespace TechC
 {
     public enum PlayerState
@@ -62,7 +59,9 @@ namespace TechC
 
         [SerializeField] private PlayerState currentState = PlayerState.Idle;
         private PlayerState lastState = PlayerState.Moving;
-
+        [SerializeField] private LayerMask npcLayer;  // NPCレイヤーに限定するためのLayerMask
+        [SerializeField] private float maxDistance = 200f;  // レイキャストの最大距離
+        private bool isInteractOnCooldown = false;
         private bool canJump = true;
         private bool wasDashing;
 
@@ -81,6 +80,7 @@ namespace TechC
             if (GameManager.I == null) return;
             if (!isDebug) return;
             GameManager.I.SetState(debugState);
+            GameManager.I.AddPoint(10000);
         }
 
         private void Update()
@@ -103,6 +103,7 @@ namespace TechC
             {
                 downwardForceCoroutine = StartCoroutine(ApplyIncreasingDownwardForce());
             }
+            IntaractAction();
         }
 
         private void FixedUpdate()
@@ -355,7 +356,33 @@ namespace TechC
             canJump = true;
         }
 
+        private void IntaractAction()
+        {
+            if (!playerInputManager.IsIntaracting || isInteractOnCooldown) return;
 
+            // カメラのスクリーン座標からRayを作成
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            // maxDistanceとnpcLayerを指定してレイキャストを実行
+            if (Physics.Raycast(ray, out hit, maxDistance, npcLayer))
+            {
+                // ヒットしたオブジェクトがIIntaractableを実装しているかチェック
+                IIntaractable interactable = hit.collider.GetComponent<IIntaractable>();
+                if (interactable != null)
+                {
+                    interactable.Intaract();
+                    StartCoroutine(InteractCooldown());
+
+                }
+            }
+        }
+        private IEnumerator InteractCooldown()
+        {
+            isInteractOnCooldown = true;
+            yield return new WaitForSeconds(1f);
+            isInteractOnCooldown = false;
+        }
         private bool IsGrounded()
         {
             Vector3 origin = new Vector3(transform.position.x, transform.position.y + height, transform.position.z);

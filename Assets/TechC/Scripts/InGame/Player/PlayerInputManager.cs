@@ -16,6 +16,7 @@ namespace TechC
         public bool IsJumping => isJumping;
         public bool IsAttacking => isAttacking;  // 攻撃状態を管理する
         public bool IsSwinging => isSwinging;  // Swinging状態を管理する
+        public bool IsIntaracting=> isIntaracting;  
 
         private Vector3 inputVector;
         private Vector3 moveInput;
@@ -24,6 +25,7 @@ namespace TechC
         private bool isJumping = false;
         private bool isAttacking = false;
         private bool isSwinging = false;
+        private bool isIntaracting=false;
 
         private float yMovement = 0f;
         private void Update()
@@ -82,6 +84,14 @@ namespace TechC
 
             isAttacking = true;  // 攻撃状態をtrueに
             StartCoroutine(Delay(1));
+        }
+        public void OnIntaract(InputAction.CallbackContext context)
+        {
+            if (context.performed) return;
+            if (context.started)
+                isIntaracting = true;
+            if(context.canceled)
+                isIntaracting = false;
         }
 
         private IEnumerator Delay(int n)

@@ -88,7 +88,6 @@ namespace TechC
             }
 
             anim.SetBool("IsAttacking", false);
-            rb.useGravity = true; // 攻撃終了後に重力を戻す
             mainCam.SetActive(true);
             attackCam.SetActive(false);
             canAttack = true;
@@ -101,6 +100,8 @@ namespace TechC
         {
             playerController.StopPlayer(hitStop);
             yield return new WaitForSeconds(hitStop);
+            rb.useGravity = true; // 攻撃終了後に重力を戻す
+
             rb.velocity = velocity*afterHit ;
 
         }

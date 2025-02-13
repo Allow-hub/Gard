@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TechC.Interface;
+using TMPro;
 using UnityEngine;
 
 namespace TechC
 {
-    public class Turret : MonoBehaviour
+    public class Turret : MonoBehaviour, IIntaractable
     {
         [SerializeField] private Transform turret;
-
         [SerializeField] private float bulletSpeed = 10;
         [SerializeField] private Transform shotPos;
         [SerializeField] private int maxLevel = 5;           // 最大レベル
@@ -17,6 +18,11 @@ namespace TechC
         [SerializeField] private float detectionRange = 10f; // 敵の検出範囲
         [SerializeField] private LayerMask targetLayer;      // 検出対象のレイヤー
 
+        [SerializeField] private TextMeshProUGUI pointText;
+        [SerializeField] private int initNeedPoint;
+        [SerializeField] private float pointMagnification = 0.2f;
+
+        private int currentNeedPoint;
         private float currentRate;   // 現在の発射レート
         private uint currentLevel;   // 現在のレベル
         private const uint initLevel = 1; // 初期レベル
@@ -28,6 +34,7 @@ namespace TechC
         {
             currentLevel = initLevel;
             currentRate = initRate;
+            currentNeedPoint = initNeedPoint;
         }
 
         private void Update()
@@ -56,7 +63,6 @@ namespace TechC
         /// </summary>
         public void LevelUp()
         {
-            if (currentLevel >= maxLevel) return;
             currentLevel++;
             currentRate -= currentRate * rateMagnification; // レベルアップ時に発射間隔を短縮
         }
@@ -94,6 +100,21 @@ namespace TechC
                     rb.velocity = direction * bulletSpeed;
                 }
             }
+        }
+
+        public void Intaract()
+        {
+            if (currentLevel >= maxLevel)
+            {
+                pointText.text = "レベルが最大";
+                return;
+            }
+
+            if (GameManager.I.GetPoint() < currentNeedPoint) return;
+            LevelUp(); 
+            GameManager.I.AddPoint(-currentNeedPoint);
+            currentNeedPoint += (int)(currentNeedPoint * pointMagnification);
+            pointText.text ="必要なポイント:"+ currentNeedPoint.ToString();
         }
 
         /// <summary>

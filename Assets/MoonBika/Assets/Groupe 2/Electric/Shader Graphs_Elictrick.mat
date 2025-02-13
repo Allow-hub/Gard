@@ -39,11 +39,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Electricity_Amount: 10
+    - _Electricity_Scale: 60
+    - _Electricity_thikness: 0.5
     - _QueueControl: 0
     - _QueueOffset: 0
-    m_Colors: []
+    m_Colors:
+    - _Color: {r: 9.1292925, g: 7.7268147, b: 1.0765674, a: 1}
+    - _Electrisity_Speed: {r: -0.1, g: 0.5, b: 0, a: 0}
+    - _Nois_Speed: {r: 0.1, g: -0.1, b: 0, a: 0}
   m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!114 &8836876616499175612
 MonoBehaviour:
   m_ObjectHideFlags: 11
