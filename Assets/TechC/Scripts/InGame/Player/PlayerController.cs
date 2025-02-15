@@ -19,6 +19,8 @@ namespace TechC
         [SerializeField] private Swinging swinging;
         [SerializeField] private ChaseCamera chaseCamera;
         [SerializeField] private Animator anim;
+        [SerializeField] private Transform limitY;
+        [SerializeField] private Transform inGameInit;
 
         [SerializeField] private bool isDebug = true;
         [SerializeField] private GameManager.GameState debugState;
@@ -61,6 +63,14 @@ namespace TechC
         private PlayerState lastState = PlayerState.Moving;
         [SerializeField] private LayerMask npcLayer;  // NPCレイヤーに限定するためのLayerMask
         [SerializeField] private float maxDistance = 200f;  // レイキャストの最大距離
+
+
+        private int hashIsJumping = Animator.StringToHash("IsJumping");
+        private int hashIsWalking = Animator.StringToHash("IsWalking");
+        private int hashIsDashing = Animator.StringToHash("IsDashing");
+        private int hashIsSwinging = Animator.StringToHash("IsSwinging");
+        private int hashIsFloating = Animator.StringToHash("IsFloating");
+
         private bool isInteractOnCooldown = false;
         private bool canJump = true;
         private bool wasDashing;
@@ -80,7 +90,6 @@ namespace TechC
             if (GameManager.I == null) return;
             if (!isDebug) return;
             GameManager.I.SetState(debugState);
-            GameManager.I.AddPoint(10000);
         }
 
         private void Update()
@@ -91,17 +100,17 @@ namespace TechC
                 return;
             }
             AnimationHandler();
-            //Vector3 forward = new Vector3(playerCamera.transform.forward.x, playerCamera.transform.forward.x, playerCamera.transform.forward.z).normalized;
-            //if (forward != Vector3.zero)
-            //{
-            //    orientation.rotation = Quaternion.LookRotation(forward);
-            //}
-
             StateHandler();
             // 地上にいなければ、下向きの力を徐々に増加させる処理を開始する
             if (!IsGrounded() && !isIncreasingDownwardForce)
             {
                 downwardForceCoroutine = StartCoroutine(ApplyIncreasingDownwardForce());
+            }
+            if (gameObject.transform.position.y <= limitY.position.y)
+            {
+                gameObject.transform.position = inGameInit.position;
+                const int value = -200;
+                GameManager.I.AddPlayerHp(value);
             }
             IntaractAction();
         }
@@ -184,16 +193,16 @@ namespace TechC
             // 浮いている（地上にいない）場合は、IsFloating を true にして、他のアニメーション更新は行わない
             if (!grounded)
             {
-                anim.SetBool("IsFloating", true);
-                anim.SetBool("IsWalking", false);
-                anim.SetBool("IsDashing", false);
+                anim.SetBool(hashIsFloating, true);
+                anim.SetBool(hashIsWalking, false);
+                anim.SetBool(hashIsDashing, false);
 
                 return;
             }
             else
             {
                 // 地上に着いたら、IsFloating を false にする
-                anim.SetBool("IsFloating", false);
+                anim.SetBool(hashIsFloating, false);
 
                 // Swinging状態でなければ、すべての Bool パラメーターをリセット
                 if (currentState != PlayerState.Swinging)
@@ -218,11 +227,11 @@ namespace TechC
             // Swinging 中は他の状態に干渉しない
             if (isSwinging)
             {
-                anim.SetBool("IsSwinging", true);
+                anim.SetBool(hashIsSwinging, true);
             }
             else if (isJumping)
             {
-                anim.SetBool("IsJumping", true);
+                anim.SetBool(hashIsJumping, true);
             }
             else if (isMoving)
             {
@@ -230,11 +239,11 @@ namespace TechC
                 // 移動中の場合、ダッシュかウォークかで分岐
                 if (isDashing)
                 {
-                    anim.SetBool("IsDashing", true);
+                    anim.SetBool(hashIsDashing, true);
                 }
                 else
                 {
-                    anim.SetBool("IsWalking", true);
+                    anim.SetBool(hashIsWalking, true);
                 }
             }
             // 移動していない場合は、リセットされているので、Animator のデフォルトステート（Idle）が再生される
@@ -291,7 +300,7 @@ namespace TechC
             currentState = newState;
 
 
-            anim.SetBool("IsJumping", newState == PlayerState.Jumping);
+            anim.SetBool(hashIsJumping, newState == PlayerState.Jumping);
 
             switch (newState)
             {
@@ -380,7 +389,7 @@ namespace TechC
         private IEnumerator InteractCooldown()
         {
             isInteractOnCooldown = true;
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(.3f);
             isInteractOnCooldown = false;
         }
         private bool IsGrounded()

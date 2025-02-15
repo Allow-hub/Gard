@@ -26,7 +26,8 @@ namespace TechC
         private bool isAttacking = false;
         private bool isSwinging = false;
         private bool isIntaracting=false;
-
+        private bool isMenu = false;
+        private bool isMenuOpening = false;
         private float yMovement = 0f;
         private void Update()
         {
@@ -113,13 +114,28 @@ namespace TechC
 
         public void OnMenu(InputAction.CallbackContext context)
         {
-            //if (GameManager.I == null) return;
-            //if (GameManager.I.currentState == GameManager.GameState.Menu)
-            //    GameManager.I.ChangeLastState();
-            //else
-            //    GameManager.I.ChangeMenuState();
+            if (GameManager.I == null) return;
+            if (!context.started) return;
+            if (isMenuOpening) return;
+            StartCoroutine(MenuCoolDown());
+            if (isMenu)
+            {
+                GameManager.I.SetMenu(false);
+                isMenu = false;
+            }
+            else
+            {
+                GameManager.I.SetMenu(true);
+                isMenu = true;
+            }
         }
 
+        private IEnumerator MenuCoolDown()
+        {
+            isMenuOpening = true;
+            yield return new WaitForSecondsRealtime(1);
+            isMenuOpening =false;
+        }
         public void ResetJumping() => isJumping = false;
         public void ResetAttacking() => isAttacking = false;
         public void ResetSwinging() => isSwinging = false;

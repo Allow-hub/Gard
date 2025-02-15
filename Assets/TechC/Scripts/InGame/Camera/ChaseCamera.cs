@@ -26,6 +26,7 @@ namespace TechC
         private Vector3 shakeOffset = Vector3.zero;
         private float initialShakeMagnitude;
         private float initFov;
+        private bool sePlayed = false;
 
         [Header("WallCheck")]
         // 現在の位置
@@ -104,11 +105,18 @@ namespace TechC
             {
                 if (!speedEffect.activeSelf)
                     speedEffect.SetActive(true);
+                if (!sePlayed)
+                {
+                    //SeManager.I.PlaySE(0);
+                    sePlayed = true;
+                }
             }
             else
             {
                 if (speedEffect.activeSelf)
                     speedEffect.SetActive(false);
+                sePlayed = false; 
+                //SeManager.I.StopSE(0);
             }
         }
 

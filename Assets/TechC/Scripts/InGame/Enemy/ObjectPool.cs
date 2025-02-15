@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace TechC
@@ -7,47 +6,56 @@ namespace TechC
     public class ObjectPool : MonoBehaviour
     {
         [Header("Object Pool Settings")]
-        [SerializeField] private ObjectPoolItem[] poolItems; // 各プレハブの設定をひとまとめにした配列
+        [SerializeField] private List<ObjectPoolItem> poolItems; // プール設定リスト
 
         // 各プレハブごとのオブジェクトプール
         private Dictionary<GameObject, Queue<GameObject>> objectPools = new Dictionary<GameObject, Queue<GameObject>>();
 
-        // 初期化メソッド：コンストラクタの代わりにこのメソッドを使用
-        public void Initialize(ObjectPoolItem[] items)
-        {
-            poolItems = items;
-        }
+        // インスタンスと元のプレハブを紐づける辞書
+        private Dictionary<GameObject, ObjectPoolItem> instanceToPoolItemMap = new Dictionary<GameObject, ObjectPoolItem>();
 
         private void Awake()
         {
-            if (poolItems == null || poolItems.Length == 0)
+            if (poolItems == null || poolItems.Count == 0)
             {
-                Debug.LogError("Object Poolの初期化が不足しています。Initializeメソッドを正しく呼び出してください。");
+                Debug.LogError("Object Poolの初期化が不足しています。プールリストを設定してください。");
                 return;
             }
 
             foreach (var poolItem in poolItems)
             {
-                if (!objectPools.ContainsKey(poolItem.prefab))
-                {
-                    objectPools[poolItem.prefab] = new Queue<GameObject>();
-                }
-
-                for (int i = 0; i < poolItem.initialSize; i++)
-                {
-                    GameObject newObject = Instantiate(poolItem.prefab);
-                    newObject.SetActive(false);
-                    newObject.transform.SetParent(poolItem.parent.transform);
-                    objectPools[poolItem.prefab].Enqueue(newObject);
-                }
+                InitializePool(poolItem);
             }
         }
 
+        // 指定したプレハブ用のプールを初期化
+        private void InitializePool(ObjectPoolItem poolItem)
+        {
+            if (!objectPools.ContainsKey(poolItem.prefab))
+            {
+                objectPools[poolItem.prefab] = new Queue<GameObject>();
+            }
+
+            for (int i = 0; i < poolItem.initialSize; i++)
+            {
+                GameObject newObject = CreateNewInstance(poolItem);
+                objectPools[poolItem.prefab].Enqueue(newObject);
+            }
+        }
+
+        // 新しいオブジェクトを作成し、プールに登録
+        private GameObject CreateNewInstance(ObjectPoolItem poolItem)
+        {
+            GameObject newObject = Instantiate(poolItem.prefab);
+            newObject.SetActive(false);
+            newObject.transform.SetParent(poolItem.parent.transform);
+            instanceToPoolItemMap[newObject] = poolItem; // インスタンスとプール情報を紐付け
+            return newObject;
+        }
 
         // プレハブからオブジェクトを取得する
         public GameObject GetObject(GameObject prefab)
         {
-            // プールにそのプレハブのオブジェクトがあれば、それを返す
             if (objectPools.ContainsKey(prefab) && objectPools[prefab].Count > 0)
             {
                 GameObject pooledObject = objectPools[prefab].Dequeue();
@@ -56,57 +64,35 @@ namespace TechC
             }
             else
             {
-                // プールに無ければ新しく作成
-                GameObject newObject = Instantiate(prefab);
-                return newObject;
+                // 初期リストに含まれるプレハブか確認
+                ObjectPoolItem poolItem = poolItems.Find(item => item.prefab == prefab);
+                if (poolItem != null)
+                {
+                    return CreateNewInstance(poolItem);
+                }
+                else
+                {
+                    Debug.LogWarning($"要求されたプレハブ {prefab.name} は ObjectPool に登録されていません。");
+                    return null;
+                }
             }
         }
 
         // オブジェクトをプールに返却する
         public void ReturnObject(GameObject obj)
         {
-            obj.SetActive(false); // オブジェクトを非アクティブにする
-            GameObject prefab = GetPrefabFromObject(obj);
+            obj.SetActive(false); // 非アクティブ化
 
-            if (prefab != null && objectPools.ContainsKey(prefab))
+            if (instanceToPoolItemMap.TryGetValue(obj, out ObjectPoolItem poolItem))
             {
-                obj.transform.SetParent(GetParentFromPrefab(prefab).transform); // プールの親オブジェクトに設定
-                objectPools[prefab].Enqueue(obj); // プールに戻す
+                obj.transform.SetParent(poolItem.parent.transform); // 元の親オブジェクトに戻す
+                objectPools[poolItem.prefab].Enqueue(obj); // プールに追加
             }
             else
             {
-                Debug.LogWarning($"オブジェクトの返却が失敗しました: {obj.name}。プールに紐づいていない可能性があります。");
-                Destroy(obj); // プレハブが見つからなければオブジェクトを破棄
+                Debug.LogWarning($"オブジェクト {obj.name} はプールに登録されていません。削除します。");
+                Destroy(obj);
             }
-        }
-
-
-        // オブジェクトからそのプレハブを取得する
-        private GameObject GetPrefabFromObject(GameObject obj)
-        {
-            foreach (var kvp in objectPools)
-            {
-                if (obj.name.Contains(kvp.Key.name)) // 名前が一致する場合に対応
-                {
-                    return kvp.Key;
-                }
-            }
-            Debug.LogWarning($"対応するプレハブが見つかりませんでした: {obj.name}");
-            return null;
-        }
-
-
-        // プレハブから親オブジェクトを取得する
-        private GameObject GetParentFromPrefab(GameObject prefab)
-        {
-            foreach (var poolItem in poolItems)
-            {
-                if (poolItem.prefab == prefab)
-                {
-                    return poolItem.parent;
-                }
-            }
-            return null;
         }
     }
 }

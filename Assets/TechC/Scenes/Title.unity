@@ -1125,6 +1125,7 @@ MonoBehaviour:
   awakeFadeDuration: 3
   tutButton: {fileID: 1213722246}
   startButton: {fileID: 1879997947}
+  voiceIntervalRange: {x: 12, y: 30}
 --- !u!4 &1411710814
 Transform:
   m_ObjectHideFlags: 0

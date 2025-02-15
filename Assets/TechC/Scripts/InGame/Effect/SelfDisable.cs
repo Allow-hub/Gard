@@ -7,18 +7,22 @@ namespace TechC
     public class SelfDisable : MonoBehaviour
     {
         [SerializeField] private float duration = 1f;
+        [SerializeField] private bool isEnemy = false;
         private  ObjectPool objectPool; 
         void Start()
         {
-            objectPool = transform.parent?.parent?.GetComponent<ObjectPool>();
+            if(isEnemy) 
+                objectPool = GameManager.I.GetEnemyPool();
+            else
+                objectPool =GameManager.I.GetSoundPool();
         }
 
         private void OnEnable()
         {
-            StopCoroutine(Delay());
             StartCoroutine(Delay());
         }
 
+        
         private IEnumerator Delay()
         {
             yield return new WaitForSeconds(duration);

@@ -9,9 +9,13 @@ namespace TechC
     {
         [SerializeField] private int targetFrameRate = 144;
         [SerializeField] private FadeManager fadeManager;
+        [SerializeField] private GameObject menuCanvas;
+        [SerializeField] private int bossDesCount = 30;
         public float sensitivity = 2;
         public int maxHp = 1000;
         public int maxMp = 1000;
+        public int maxHomeHp = 1000;
+
         private bool CanPlay = true;
         private ObjectPool enemyAndEffectPool;
         private ObjectPool soundPool;
@@ -19,7 +23,8 @@ namespace TechC
         private int playerHp = 1000;
         private int playerMp = 1000;
         private int homeHp = 1000;
-
+        private Transform player;
+        private int DesCount = 0;
         public enum GameState
         {
             Title,
@@ -33,7 +38,7 @@ namespace TechC
         protected override void Init()
         {
             base.Init();
-
+            //Shader.WarmupAllShaders();
             // VSyncCount を Dont Sync に変更
             QualitySettings.vSyncCount = 0;
             // fps 144 を目標に設定
@@ -60,6 +65,7 @@ namespace TechC
                 case GameState.Clear:
                     break;
                 case GameState.GameOver:
+                    GameOverInit();
                     break;
                 case GameState.Tutorial:
                     TutorialInit();
@@ -80,6 +86,11 @@ namespace TechC
                 case GameState.Clear:
                     break;
                 case GameState.GameOver:
+                    break;
+                case GameState.Tutorial:
+                    break;
+                case GameState.InGame:
+                    InGame();
                     break;
             }
         }
@@ -124,11 +135,17 @@ namespace TechC
         public int GetPlayerMp() => playerMp;
         public void AddPlayerHp(int value)
         {
+            if (value < 0)
+            {
+                SeManager.I.PlaySE(2);
+            }
+
             playerHp += value;
-            if (playerHp<=0)
+            if (playerHp <= 0)
             {
                 playerHp = 0;
-            }else if(playerHp>=maxHp)
+            }
+            else if (playerHp >= maxHp)
             {
                 playerHp = maxHp;
             }
@@ -154,10 +171,16 @@ namespace TechC
             {
                 homeHp = 0;
             }
+            else if (homeHp >= maxHp)
+            {
+                homeHp = maxHp;
+            }
         }
+        public bool BossComing() => DesCount >= bossDesCount;
+        public void AddDesCount() => DesCount++;
 
         //HPが0以下で死亡でfalse
-        public bool IsAliving()=>playerHp > 0||homeHp>0;
+        public bool IsAliving() => playerHp > 0 && homeHp > 0;
         public int GetPoint() => point;
         public void AddPoint(int value) => point += value;
         public FadeManager GetFadeManager() => fadeManager;
@@ -168,7 +191,13 @@ namespace TechC
 
         private void TitleInit()
         {
-            ChangeCursorMode(transform, CursorLockMode.None);
+            DesCount = 0;
+            point = 0;
+            playerHp = maxHp;
+            playerMp = maxMp;
+            homeHp = maxHp;
+
+            ChangeCursorMode(true, CursorLockMode.None);
             BgmManager.I.SetTitleBgm();
             BgmManager.I.PlayBGM();
         }
@@ -186,20 +215,67 @@ namespace TechC
         private void InGameInit()
         {
             ChangeCursorMode(false, CursorLockMode.Locked);
-            if (soundPool == null || enemyAndEffectPool == null)
-            {
-                soundPool = GameObject.Find("SoundPool").GetComponent<ObjectPool>();
-                enemyAndEffectPool = GameObject.Find("EnemyPool").GetComponent<ObjectPool>();
-            }
+            DesCount = 0;
+            point = 0;
+            playerHp = maxHp;
+            playerMp = maxMp;
+            homeHp = maxHp;
+
+            AddPoint(200);
             BgmManager.I.SetInGameBgm();
             BgmManager.I.PlayBGM();
         }
-        public ObjectPool GetSoundPool() => soundPool;
-        public ObjectPool GetEnemyPool() => enemyAndEffectPool;
+
+        private void GameOverInit()
+        {
+            ChangeCursorMode(true, CursorLockMode.None);
+            SeManager.I.PlaySE(5);
+        }
+
+        private void InGame()
+        {
+            if (!IsAliving())
+                ChangeGameOverState();
+        }
+
+        public void SetMenu(bool val)
+        {
+            CanPlay = !val;
+            menuCanvas.SetActive(val);
+            Time.timeScale = val ? 0 : 1;
+            ChangeCursorMode(val, val ? CursorLockMode.None : CursorLockMode.Locked);
+        }
+        public Transform GetPlayerTransform()
+        {
+            if (player == null)
+                player = GameObject.FindWithTag("Player").transform;
+            return player.transform;
+        }
+
+        public float CalcDistanceFromPlayer(Vector3 pos)
+        {
+            if (player == null)
+                player = GameObject.FindWithTag("Player").transform;
+            return Vector3.Distance(pos, player.transform.position);
+        }
+
+        public ObjectPool GetSoundPool()
+        {
+            if (soundPool == null)
+                soundPool = GameObject.Find("SoundPool").GetComponent<ObjectPool>();
+            return soundPool;
+        }
+        public ObjectPool GetEnemyPool()
+        {
+            if (enemyAndEffectPool == null)
+                enemyAndEffectPool = GameObject.Find("EnemyPool").GetComponent<ObjectPool>();
+            return enemyAndEffectPool;
+        }
 
         public void ChangeTitleState() => SetState(GameState.Title);
         public void ChangeTutorialState() => SetState(GameState.Tutorial);
         public void ChangeInGameState() => SetState(GameState.InGame);
+        public void ChangeGameOverState() => SetState(GameState.GameOver);
     }
 
 }

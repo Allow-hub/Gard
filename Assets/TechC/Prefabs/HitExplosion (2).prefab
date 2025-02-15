@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   duration: 1
+  isEnemy: 1
 --- !u!1001 &7403472272979683951
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -42,14 +42,16 @@ namespace TechC
             elapsedTime += Time.deltaTime;
 
             // ターゲットがいなければ探す
-            if (target == null)
+            if (target == null || !target.gameObject.activeSelf) // ターゲットが非アクティブかどうかを確認
             {
-                DetectTarget();
+                DetectTarget(); // 非アクティブならターゲットを再検出
             }
+
             if (target != null)
             {
                 RotateTurret();
             }
+
             // 発射レートを超えたら弾を発射
             if (elapsedTime > currentRate && target != null)
             {
@@ -57,6 +59,7 @@ namespace TechC
                 elapsedTime = 0;
             }
         }
+
 
         /// <summary>
         /// タレットのレベルを上げる

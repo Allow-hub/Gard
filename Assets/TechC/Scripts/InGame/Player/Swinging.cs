@@ -26,9 +26,9 @@ namespace TechC
         [SerializeField] private Transform predictionPoint;
 
         [Header("OdmGear")]
-        [SerializeField] private float horizontalThrustForce;
+        [SerializeField] private float lateralMultiplier = 1.5f; // 例：横方向の力を1.5倍にする
+
         [SerializeField] private float forwardThurstForce;
-        [SerializeField] private float extendCableSpeed;
 
         [Header("Swinging")]
         [SerializeField] float maxSwingDistance;
@@ -159,7 +159,6 @@ namespace TechC
                 lr.positionCount = 2;
             }
 
-            // 現在の距離を使ってJointの距離設定（既存処理）
             float distanceFromPoint = Vector3.Distance(player.position, swingPoint);
             joint.maxDistance = distanceFromPoint * distanceFromPointMax;
             joint.minDistance = distanceFromPoint * distanceFromPointMin;
@@ -170,21 +169,29 @@ namespace TechC
 
             // 目標位置はヒット位置から少し上方向（addHight分オフセット）
             Vector3 targetPos = new Vector3(predictionHit.point.x, predictionHit.point.y + addHight, predictionHit.point.z);
+            // 通常の方向を計算
             Vector3 direction = (targetPos - player.position).normalized;
 
-            // 現在の距離（playerとswingPoint間）に基づいて、力を線形補間する
-            // t = 0 のとき：distance が distanceFromPointMin 付近 → 力は forceRange.x
-            // t = 1 のとき：distance が maxSwingDistance 付近 → 力は forceRange.y
+            // 横向き（水平）の力を大きくするための処理
+                                            // 水平成分（X-Z平面）
+            Vector3 horizontal = new Vector3(direction.x, 0, direction.z);
+            // 垂直成分（Y軸成分）
+            Vector3 vertical = new Vector3(0, direction.y, 0);
+            // 水平成分に倍率をかけ、垂直成分はそのままにする
+            Vector3 modifiedDirection = (horizontal * lateralMultiplier + vertical).normalized;
+
+            // プレイヤーとswingPoint間の距離に基づいて力を計算
             float currentDistance = Vector3.Distance(player.position, swingPoint);
             float t = Mathf.InverseLerp(distanceFromPointMin, maxSwingDistance, currentDistance);
             float computedForce = Mathf.Lerp(forceRange.x, forceRange.y, t);
 
             // 計算された力でImpulseを加える
-            playerController.PlayerAddForce(direction, computedForce, ForceMode.Impulse);
+            playerController.PlayerAddForce(modifiedDirection, computedForce, ForceMode.Impulse);
 
             yield return new WaitForSeconds(1f);
             supportOnCooldown = false;
         }
+
 
         private void CheckForSwingPoint()
         {

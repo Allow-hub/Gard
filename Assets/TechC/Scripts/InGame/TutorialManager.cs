@@ -16,11 +16,13 @@ namespace TechC
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private Transform minY;
         [SerializeField] private Transform warpPos;
+        [SerializeField] private GameObject orderCanvas;
         [SerializeField] private float warpDuration = 3f;
         private bool isWarping = false;
 
         private void Start()
         {
+            orderCanvas.SetActive(false);
             for (int i = 0; i < explainObj.Length; i++)
             {
                 explainObj[i].gameObject.SetActive(false);
@@ -55,6 +57,7 @@ namespace TechC
             }
             else
             {
+                orderCanvas.SetActive(true);
                 player.transform.position = inGameInitPos.position;
                 gameObject.SetActive(false);
             }
@@ -68,6 +71,8 @@ namespace TechC
             // ワープ完了後、初期位置に戻す
             this.DelayMethod(warpDuration, () =>
             {
+                orderCanvas.SetActive(true);
+                SeManager.I.PlaySE(3);
                 player.transform.position = inGameInitPos.position;
                 GameManager.I.ChangeInGameState();
             });

@@ -15,6 +15,10 @@ namespace TechC
             audioSource.PlayOneShot(clip[clipIndex]);
         }
 
+        public void StopSE(int clipIndex)
+        {
+            audioSource.Stop();
+        }
         public void SetSEVolume(float volume)
         {
             audioSource.volume = volume;

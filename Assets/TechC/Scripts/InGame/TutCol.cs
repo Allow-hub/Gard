@@ -19,7 +19,7 @@ namespace TechC
         private void OnTriggerEnter(Collider other)
         {
             if (once) return;
-            if (isLast)
+            if (isLast&& other.gameObject.CompareTag("Player"))
             {
                 tutorialManager.ChangeInGame();
                 once =true; 

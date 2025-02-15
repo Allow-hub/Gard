@@ -23,12 +23,12 @@ TagManager:
   - 
   - 
   - Enemy
-  - 
+  - EnemyAttack
   - FrontUi
   - 
   - Npc
   - 
-  - 
+  - NoPostProccesing
   - 
   - 
   - 
