@@ -24,6 +24,7 @@ namespace TechC.Enemy
         [SerializeField] private float distance = 200;//playerとの距離により攻撃場所を変える
         [SerializeField] private float bulletSpeed = 100f;
         [SerializeField] private Vector3 homePos;
+        [SerializeField] private int healMp = 50;
         
         private float currentInterval;
         private float elapsedTime;
@@ -134,7 +135,7 @@ namespace TechC.Enemy
         public void Death()
         {
             if (objectPool == null) return;
-
+            GameManager.I.AddPlayerMp(healMp);
   
             // スコア加算
             GameManager.I.AddPoint(addPoint);

@@ -67,6 +67,12 @@ namespace TechC
             }
 
             if (!canAttack) return; // クールダウン中は攻撃不可
+
+            if (playerInputManager.IsAttacking)
+            {
+                if (currentAttackMode == AttackMode.Shooting)
+                    Shot();
+            }
             if (swinging.GetHitObject() == null) return;
 
             hitObj = swinging.GetHitObject();
@@ -75,8 +81,6 @@ namespace TechC
             {
                 if (currentAttackMode == AttackMode.Normal)
                     Attack();
-                else
-                    Shot();
             }
         }
 
@@ -89,9 +93,6 @@ namespace TechC
                 objectPool = GameManager.I.GetEnemyPool();
             StartCoroutine(Voice());
 
-            // ターゲットが設定されていない場合は処理を中断
-            if (hitObj == null) return;
-
             // オブジェクトプールから弾を取得
             var bullet = objectPool.GetObject(bulletPrefab);
             if (bullet != null)
@@ -100,21 +101,23 @@ namespace TechC
                 bullet.transform.position = shotPos.position;
                 bullet.SetActive(true);
 
-                // ターゲットの方向に弾の向きを調整
-                bullet.transform.LookAt(hitObj.transform.position);
+                // プレイヤーが向いている方向を取得
+                Vector3 shotDirection = mainCam.transform.forward;
 
-                // Rigidbody を取得してターゲットに向けて速度を設定
+                // Rigidbody を取得して、弾を前方に飛ばす
                 Rigidbody rbBullet = bullet.GetComponent<Rigidbody>();
+                bullet.transform.LookAt(mainCam.transform.position);
                 if (rbBullet != null)
                 {
-                    Vector3 direction = (hitObj.transform.position - bullet.transform.position).normalized;
-                    rbBullet.velocity = direction * bulletSpeed;
+                    rbBullet.velocity = shotDirection * bulletSpeed;
                 }
             }
+
             GameManager.I.AddPlayerMp(-bulletMp);
             // クールダウン処理を開始
             StartCoroutine(ShotCooldown());
         }
+
 
         private IEnumerator ShotCooldown()
         {
