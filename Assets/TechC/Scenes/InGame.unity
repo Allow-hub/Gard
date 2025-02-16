@@ -1961,7 +1961,7 @@ MonoBehaviour:
   limitY: {fileID: 2114977351}
   inGameInit: {fileID: 1164382942}
   isDebug: 1
-  debugState: 2
+  debugState: 3
   moveSpeed: 3
   rotationSpeed: 10
   decelerationFactor: 2
@@ -2233,7 +2233,7 @@ MonoBehaviour:
   afterHit: 0.3
   forceRange: {x: 100, y: 400}
   attackHeightOffset: 0
-  bulletSpeed: 150
+  bulletSpeed: 300
   shotPos: {fileID: 128169092}
   bulletMp: 100
   damage: 10
