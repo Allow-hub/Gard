@@ -63,6 +63,7 @@ namespace TechC
                 case GameState.Menu:
                     break;
                 case GameState.Clear:
+                    ClearInit();
                     break;
                 case GameState.GameOver:
                     GameOverInit();
@@ -178,6 +179,7 @@ namespace TechC
         }
         public bool BossComing() => DesCount >= bossDesCount;
         public void AddDesCount() => DesCount++;
+        public int GetDesCount() => DesCount;   
 
         //HPが0以下で死亡でfalse
         public bool IsAliving() => playerHp > 0 && homeHp > 0;
@@ -224,6 +226,11 @@ namespace TechC
             AddPoint(200);
             BgmManager.I.SetInGameBgm();
             BgmManager.I.PlayBGM();
+        }
+
+        private void ClearInit()
+        {
+            ChangeCursorMode(true, CursorLockMode.None);
         }
 
         private void GameOverInit()
@@ -276,6 +283,8 @@ namespace TechC
         public void ChangeTutorialState() => SetState(GameState.Tutorial);
         public void ChangeInGameState() => SetState(GameState.InGame);
         public void ChangeGameOverState() => SetState(GameState.GameOver);
+
+        public void ChangeClearState() => SetState(GameState.Clear);
     }
 
 }

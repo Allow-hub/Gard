@@ -7,8 +7,10 @@ namespace TechC
 {
     public class Point : MonoBehaviour
     {
+        [SerializeField] private TextMeshProUGUI desText;
         private TextMeshProUGUI tex;
         private int lastPoint;
+        private int lastDesCount;
 
         private void Start()
         {
@@ -18,6 +20,7 @@ namespace TechC
         private void Update()
         {
             UpdatePoint();
+            UpdateDesCount();
         }
 
 
@@ -26,6 +29,12 @@ namespace TechC
             if (GameManager.I.GetPoint() == lastPoint) return;
             tex.text = "強化ポイント:" + GameManager.I.GetPoint();
             lastPoint = GameManager.I.GetPoint();
+        }
+        private void UpdateDesCount()
+        {
+            if (GameManager.I.GetDesCount() == lastDesCount) return;
+            desText.text = "討伐数:" + GameManager.I.GetDesCount();
+            lastDesCount = GameManager.I.GetDesCount();
         }
     }
 }

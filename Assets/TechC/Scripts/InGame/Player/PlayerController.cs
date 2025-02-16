@@ -21,6 +21,7 @@ namespace TechC
         [SerializeField] private Animator anim;
         [SerializeField] private Transform limitY;
         [SerializeField] private Transform inGameInit;
+        [SerializeField] private GameObject boss;
 
         [SerializeField] private bool isDebug = true;
         [SerializeField] private GameManager.GameState debugState;
@@ -74,6 +75,7 @@ namespace TechC
         private bool isInteractOnCooldown = false;
         private bool canJump = true;
         private bool wasDashing;
+        private bool once = false;
 
         private bool isIncreasingDownwardForce = false;
         [SerializeField] private float maxAdditionalDownwardForce = 20f; // 追加する下向きの力の最大値（例：20）
@@ -81,6 +83,7 @@ namespace TechC
 
         private void Awake()
         {
+            once = false;
             playerCamera = Camera.main;
             rb = GetComponent<Rigidbody>();
             smokeEffect.SetActive(false);
@@ -113,6 +116,13 @@ namespace TechC
                 GameManager.I.AddPlayerHp(value);
             }
             IntaractAction();
+
+            if (once) return;
+            if (GameManager.I.BossComing())
+            {
+                boss.SetActive(true);
+                once =true;
+            }
         }
 
         private void FixedUpdate()

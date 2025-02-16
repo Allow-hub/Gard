@@ -58,7 +58,10 @@ namespace TechC
             var se = soundPool.GetObject(soundPrefab);
             se.transform.position = hitPosition;
             this.DelayMethod(0.1f,()=> enemyPool.ReturnObject(gameObject));
-            IDamageable damageable = other.gameObject.transform.parent?.GetComponent<IDamageable>();
+            IDamageable damageable = other.GetComponent<IDamageable>();
+            if (damageable == null)
+                 damageable = other.gameObject.transform.parent?.GetComponent<IDamageable>();
+
             if (damageable != null)
             {
                 // ダメージを与える

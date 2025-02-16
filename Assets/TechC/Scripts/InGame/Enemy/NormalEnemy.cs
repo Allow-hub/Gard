@@ -139,7 +139,7 @@ namespace TechC.Enemy
   
             // スコア加算
             GameManager.I.AddPoint(addPoint);
-
+            GameManager.I.AddDesCount();
             // オブジェクトをプールに戻す
             objectPool.ReturnObject(gameObject);
         }

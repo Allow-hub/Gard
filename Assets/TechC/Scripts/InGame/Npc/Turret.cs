@@ -17,7 +17,7 @@ namespace TechC
         [SerializeField] private GameObject bulletPrefab;    // 弾のプレハブ
         [SerializeField] private float detectionRange = 10f; // 敵の検出範囲
         [SerializeField] private LayerMask targetLayer;      // 検出対象のレイヤー
-
+        [SerializeField] private int changeTargetCount=5;
         [SerializeField] private TextMeshProUGUI pointText;
         [SerializeField] private int initNeedPoint;
         [SerializeField] private float pointMagnification = 0.2f;
@@ -29,7 +29,7 @@ namespace TechC
         private ObjectPool bulletPool;    // 弾のオブジェクトプール
         private float elapsedTime = 0;    // 経過時間
         private Transform target;         // 現在のターゲット
-
+        private int fireCount;
         private void Start()
         {
             currentLevel = initLevel;
@@ -42,7 +42,7 @@ namespace TechC
             elapsedTime += Time.deltaTime;
 
             // ターゲットがいなければ探す
-            if (target == null || !target.gameObject.activeSelf) // ターゲットが非アクティブかどうかを確認
+            if (target == null || !target.gameObject.transform.parent.gameObject.activeSelf) // ターゲットが非アクティブかどうかを確認
             {
                 DetectTarget(); // 非アクティブならターゲットを再検出
             }
@@ -78,9 +78,10 @@ namespace TechC
             Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRange, targetLayer);
             if (colliders.Length > 0)
             {
-                target = colliders[0].transform; // 最初に見つかったターゲットを設定
+                target = colliders[Random.Range(0, colliders.Length)].transform; // ランダムに選択
             }
         }
+
 
         /// <summary>
         /// ターゲットを狙って弾を発射
@@ -103,6 +104,14 @@ namespace TechC
                     rb.velocity = direction * bulletSpeed;
                 }
             }
+            fireCount++;
+
+            // 5発ごとにターゲット変更
+            if (fireCount >= changeTargetCount)
+            {
+                DetectTarget();
+                fireCount = 0;  // カウントリセット
+            }
         }
 
         public void Intaract()
@@ -114,10 +123,10 @@ namespace TechC
             }
 
             if (GameManager.I.GetPoint() < currentNeedPoint) return;
-            LevelUp(); 
+            LevelUp();
             GameManager.I.AddPoint(-currentNeedPoint);
             currentNeedPoint += (int)(currentNeedPoint * pointMagnification);
-            pointText.text ="必要なポイント:"+ currentNeedPoint.ToString();
+            pointText.text = "必要なポイント:" + currentNeedPoint.ToString();
         }
 
         /// <summary>
