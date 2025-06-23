@@ -42,7 +42,7 @@ namespace TechC
             elapsedTime += Time.deltaTime;
 
             // ターゲットがいなければ探す
-            if (target == null || !target.gameObject.transform.parent.gameObject.activeSelf) // ターゲットが非アクティブかどうかを確認
+            if (target == null || target.transform.parent == null || !target.transform.parent.gameObject.activeSelf)
             {
                 DetectTarget(); // 非アクティブならターゲットを再検出
             }

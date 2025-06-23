@@ -2365,7 +2365,7 @@ MonoBehaviour:
   targetFrameRate: 144
   fadeManager: {fileID: 1183286595}
   menuCanvas: {fileID: 1389646482}
-  bossDesCount: 200
+  bossDesCount: 50
   sensitivity: 2
   maxHp: 1000
   maxMp: 1000

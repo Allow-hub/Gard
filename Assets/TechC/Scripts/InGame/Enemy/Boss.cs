@@ -148,7 +148,7 @@ namespace TechC
                 enemyPool = GameManager.I.GetEnemyPool();
                 soundPool = GameManager.I.GetSoundPool();
             }
-            this.DelayMethod(4f, () =>
+            this.DelayMethod(1f, () =>
             {
                 var obj = enemyPool.GetObject(explosion);
                 obj.transform.position = gameObject.transform.position;

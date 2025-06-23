@@ -1961,7 +1961,7 @@ MonoBehaviour:
   limitY: {fileID: 2114977351}
   inGameInit: {fileID: 1164382942}
   boss: {fileID: 1285095310}
-  isDebug: 0
+  isDebug: 1
   debugState: 3
   moveSpeed: 3
   rotationSpeed: 10
@@ -11836,7 +11836,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 491814376}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
   m_Name: 
@@ -15774,7 +15774,7 @@ MonoBehaviour:
     type: 3}
   maxEnemies: 30
   spawnRadius: 130
-  spawnInterval: 0.8
+  spawnInterval: 1.4
 --- !u!1 &705393776 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 33132865451337252, guid: 3c3dda36283cdf94484f0847cc4356a8,
@@ -16730,7 +16730,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 68feeaa6b5d221e4e9fa3b5ba13dc518, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5783e180d3c5f434f93a58f0f67ab4c4, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -31407,7 +31407,7 @@ MonoBehaviour:
     type: 3}
   maxEnemies: 30
   spawnRadius: 130
-  spawnInterval: 0.8
+  spawnInterval: 1.4
 --- !u!1 &1223823674
 GameObject:
   m_ObjectHideFlags: 0
@@ -40266,7 +40266,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1504895235}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
   m_Name: 
@@ -41841,6 +41841,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointTex: {fileID: 491814377}
   desCountTex: {fileID: 1504895236}
+  button: {fileID: 746477740}
 --- !u!114 &1571133065
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43108,7 +43109,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1653219036}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
   m_Name: 
@@ -44308,7 +44309,7 @@ MonoBehaviour:
     type: 3}
   maxEnemies: 30
   spawnRadius: 130
-  spawnInterval: 0.8
+  spawnInterval: 1.4
 --- !u!1 &1708618494 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -1616912010811020984, guid: 3c3dda36283cdf94484f0847cc4356a8,
@@ -51794,7 +51795,7 @@ MonoBehaviour:
     type: 3}
   maxEnemies: 30
   spawnRadius: 130
-  spawnInterval: 0.8
+  spawnInterval: 1.4
 --- !u!1 &2126207335 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8628447699374406333, guid: 3c3dda36283cdf94484f0847cc4356a8,
